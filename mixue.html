@@ -409,11 +409,45 @@ function renderExchange(){
 }
 function renderShareholder(){
     var d=loadD();var list=d.shareholder.slice().reverse();if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
-    var total=0;for(var i=0;i<list.length;i++)total+=toKZT(list[i].amount,list[i].currency);
-    document.getElementById("shareholder-total").textContent=list.length+"位股东 | 出资折合₸"+fmt(total);
-    var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">👥</div>暂无股东</div>';
-    else for(var i=0;i<list.length;i++){var r=list[i];h+='<div class="record-item" onclick="editRecord(\'shareholder\','+d.shareholder.indexOf(r)+')"><div class="record-info"><div class="cat">'+r.name+' ('+(r.share||0)+'%)</div><div class="meta">'+fmtD(r.date)+' | '+fmtCur(r.amount,r.currency)+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount shareholder">'+fmtCur(r.amount,r.currency)+'<span class="sub">折合₸'+fmt(toKZT(r.amount,r.currency))+'</span></div></div>'}
+    // Aggregate by shareholder name
+    var agg={},names=[];
+    for(var i=0;i<list.length;i++){var r=list[i];if(!agg[r.name]){agg[r.name]={name:r.name,totalKZT:0,share:r.share||0,count:0,entries:[]};names.push(r.name)}agg[r.name].totalKZT+=toKZT(r.amount,r.currency);agg[r.name].count++;agg[r.name].entries.push(r)}
+    var totalKZT=0;for(var i=0;i<names.length;i++)totalKZT+=agg[names[i]].totalKZT;
+    
+    // Add new shareholder button
+    document.getElementById("shareholder-total").innerHTML='<button class="btn btn-primary btn-block btn-sm" onclick="openModal(\'shareholder\')" style="margin-bottom:8px">+ 新增股东出资</button>共 '+names.length+' 位股东 | 总出资 ₸'+fmt(totalKZT);
+    
+    var h="";
+    if(names.length===0)h='<div class="empty-state"><div class="icon">👥</div>暂无股东</div>';
+    else {
+        h+='<div class="summary-grid">';
+        for(var i=0;i<names.length;i++){
+            var a=agg[names[i]],pct=totalKZT>0?(a.totalKZT/totalKZT*100):0;
+            h+='<div class="summary-item" onclick="showShareholderDetail(\''+a.name.replace(/'/g,"\\'")+'\')" style="cursor:pointer">';
+            h+='<div class="label">'+a.name+'</div>';
+            h+='<div class="value" style="color:var(--primary)">'+fmt(a.share)+'%</div>';
+            h+='<div class="sub">出资 ₸'+fmt(a.totalKZT)+' ('+fmt(pct)+'%)</div>';
+            h+='</div>';
+        }
+        h+='</div>';
+        // Detail section
+        h+='<div id="shareholder-detail" style="margin-top:10px"></div>';
+    }
     document.getElementById("shareholder-list").innerHTML=h;
+}
+
+function showShareholderDetail(name){
+    var d=loadD();var entries=[];
+    for(var i=0;i<d.shareholder.length;i++){if(d.shareholder[i].name===name)entries.push(d.shareholder[i])}
+    entries.reverse();
+    var total=0;for(var i=0;i<entries.length;i++)total+=toKZT(entries[i].amount,entries[i].currency);
+    var h='<div class="card"><h3>'+name+' 出资明细 <span style="font-size:12px;color:var(--sub)">合计 ₸'+fmt(total)+'</span></h3>';
+    for(var i=0;i<entries.length;i++){
+        var r=entries[i],idx=d.shareholder.indexOf(r);
+        h+='<div class="record-item" onclick="editRecord(\'shareholder\','+idx+')"><div class="record-info"><div class="cat">'+fmtCur(r.amount,r.currency)+'</div><div class="meta">'+fmtD(r.date)+' | 占股 '+(r.share||0)+'%</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount shareholder">'+fmtCur(r.amount,r.currency)+'<span class="sub">₸'+fmt(toKZT(r.amount,r.currency))+'</span></div></div>';
+    }
+    h+='</div>';
+    document.getElementById("shareholder-detail").innerHTML=h;
 }
 function renderSummary(){
     if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("summary-month").value,store=document.getElementById("summary-store").value;
@@ -424,6 +458,9 @@ function renderSummary(){
     var h='<div class="summary-grid"><div class="summary-item"><div class="label">总收入(KZT)</div><div class="value" style="color:var(--green)">₸'+fmt(ti)+'</div></div><div class="summary-item"><div class="label">总支出(KZT)</div><div class="value" style="color:var(--red)">₸'+fmt(te)+'</div></div><div class="summary-item"><div class="label">净利润(KZT)</div><div class="value" style="color:'+(np>=0?'var(--green)':'var(--red)')+'">₸'+fmt(np)+'</div></div><div class="summary-item"><div class="label">净利润率</div><div class="value">'+fmt(pr)+'%</div></div></div>';
     var aMap={};for(var i=0;i<ACCOUNTS.length;i++)aMap[ACCOUNTS[i]]=0;for(var i=0;i<inc.length;i++){if(inc[i].account&&aMap[inc[i].account]!==undefined)aMap[inc[i].account]+=inc[i].amountKZT||0}for(var i=0;i<exp.length;i++){if(exp[i].account&&aMap[exp[i].account]!==undefined)aMap[exp[i].account]-=exp[i].amountKZT||0}
     h+='<div class="section-title">🏦 账户余额</div>';for(var i=0;i<ACCOUNTS.length;i++){var k=ACCOUNTS[i];h+='<div class="total-bar"><span class="label">'+k+'</span><span class="value" style="color:'+(aMap[k]>=0?'var(--green)':'var(--red)')+'">₸'+fmt(aMap[k])+'</span></div>'}
+    // Shareholder profit distribution
+    h+='<div class="section-title">👥 股东分红预估</div>';var sh=d.shareholder;var shAgg={},shNames=[];for(var i=0;i<sh.length;i++){var s=sh[i];if(!shAgg[s.name]){shAgg[s.name]={name:s.name,share:s.share||0};shNames.push(s.name)}}
+    if(shNames.length===0)h+='<div class="empty-state">暂无股东</div>';else for(var i=0;i<shNames.length;i++){var sa=shAgg[shNames[i]],div=np>0?np*sa.share/100:0;h+='<div class="total-bar"><span class="label">'+sa.name+' ('+sa.share+'%)</span><span class="value" style="color:'+(div>0?'var(--green)':'var(--red)')+'">₸'+fmt(div)+'</span></div>'}
     document.getElementById("summary-content").innerHTML=h;
 }
 function renderAnalysis(){
