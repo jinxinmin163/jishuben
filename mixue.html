@@ -533,7 +533,7 @@ function renderAccounts(){
         h+='</div></div>';
     }
     h+='<div class="total-bar" style="background:var(--primary);color:#fff"><span class="label" style="color:#fff">总计(KZT)</span><span class="value">₸'+fmt(totalKZT)+'</span></div></div>';
-    document.getElementById("accounts-content").innerHTML=h;}
+    document.getElementById("accounts-content").innerHTML=h;
 }
 
 function refreshAll(){renderIncome();renderExpense();renderExchange();renderShareholder();renderAccounts();if(userRole==="admin"){renderSummary();renderAnalysis();renderSalary()}}
