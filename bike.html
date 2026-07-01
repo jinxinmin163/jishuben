@@ -3,500 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>自行车店记账本</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:#f0f2f5;min-height:100dvh;color:#333}
-.header{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.header h1{font-size:18px;font-weight:600}
-.header .btns{display:flex;gap:8px}
-.header .btns button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer}
-.store-bar{background:#fff;padding:8px 16px;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid #e5e7eb;position:sticky;top:50px;z-index:99}
-.store-bar button{padding:6px 14px;border-radius:16px;border:1px solid #d1d5db;background:#fff;font-size:13px;white-space:nowrap;cursor:pointer;transition:all .2s}
-.store-bar button.active{background:#2563eb;color:#fff;border-color:#2563eb}
-.tab-bar{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;overflow-x:auto;position:sticky;top:90px;z-index:98}
-.tab-bar button{flex:1;min-width:fit-content;padding:10px 8px;border:none;background:none;font-size:14px;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
-.tab-bar button.active{color:#2563eb;border-bottom-color:#2563eb;font-weight:600}
-.tab-bar .admin-only{display:none}
-.tab-bar .admin-only.visible{display:block}
-.content{padding:12px 12px 80px}
-.card{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:13px}
-.card .row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
-.card .tag{font-size:11px;padding:2px 8px;border-radius:10px;background:#dbeafe;color:#1d4ed8}
-.card .amt{font-size:18px;font-weight:700}
-.card .amt.in{color:#16a34a}
-.card .amt.out{color:#dc2626}
-.card .meta{font-size:11px;color:#9ca3af;margin-top:2px}
-.fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:28px;background:#2563eb;color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4);z-index:50;display:flex;align-items:center;justify-content:center}
-.fab:active{transform:scale(.95)}
-.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
-.overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;padding:20px;width:92%;max-width:420px;max-height:85vh;overflow-y:auto}
-.modal h3{font-size:16px;margin-bottom:16px;text-align:center}
-.modal label{display:block;font-size:13px;color:#6b7280;margin:10px 0 4px}
-.modal input,.modal select,.modal textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;background:#fff}
-.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#2563eb}
-.modal .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.modal .pay-grid label{font-size:12px;margin-top:4px}
-.modal .btn-row{display:flex;gap:10px;margin-top:16px}
-.modal .btn-row button{flex:1;padding:10px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer}
-.modal .btn1{background:#2563eb;color:#fff}
-.modal .btn2{background:#e5e7eb;color:#374151}
-.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.scard{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.scard .num{font-size:22px;font-weight:700;margin:4px 0}
-.scard .lbl{font-size:11px;color:#6b7280}
-.login{max-width:360px;margin:60px auto;background:#fff;border-radius:20px;padding:32px 24px;box-shadow:0 8px 32px rgba(0,0,0,.1);text-align:center}
-.login h2{font-size:22px;margin-bottom:8px}
-.login p{font-size:13px;color:#6b7280;margin-bottom:20px}
-.login input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;text-align:center;margin-bottom:12px}
-.login button{width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:10px}
-.login .btn-admin{background:#2563eb;color:#fff}
-.login .btn-staff{background:#e5e7eb;color:#374151}
-.login .err{color:#dc2626;font-size:13px;display:none}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+<title>🚲 自行车店记账本</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#10b981;--green-light:#d1fae5;--red:#ef4444;--red-light:#fee2e2;--bg:#f2f3f5;--card:#fff;--text:#1f2937;--sub:#6b7280;--border:#e5e7eb;--primary:#2563eb;--orange:#f59e0b;--orange-light:#fef3c7}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:80px;font-size:14px}
+header{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:10px 16px;position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+header h1{font-size:17px;font-weight:600}
+.header-btns{display:flex;gap:6px}
+.header-btns button{background:rgba(255,255,255,.2);border:0;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#2563eb,#1d4ed8);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.login-screen h2{font-size:26px;color:#fff;margin-bottom:8px}
+.login-screen .subtitle{color:rgba(255,255,255,.7);font-size:13px;margin-bottom:28px}
+.login-card{background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:350px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.login-card .title{font-size:16px;font-weight:600;text-align:center;margin-bottom:16px}
+.login-card input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;text-align:center;margin-bottom:12px;font-family:inherit}
+.login-card input:focus{outline:0;border-color:var(--primary)}
+.login-card .btn{width:100%;margin-bottom:8px}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:8px}
+.store-bar{background:#fff;padding:6px 12px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border);position:sticky;top:44px;z-index:49;scrollbar-width:none}
+.store-bar::-webkit-scrollbar{display:none}
+.store-tag{padding:5px 14px;border:1px solid var(--border);border-radius:16px;font-size:13px;background:#fff;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
+.store-tag.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:82px;z-index:48;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex:1 0 auto;min-width:fit-content;padding:10px 6px;border:0;background:none;font-size:13px;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;white-space:nowrap}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.page{display:none;padding:10px 14px}
+.page.active{display:block}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h3{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.form-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.form-row>*{flex:1;min-width:0}
+label{display:block;font-size:12px;color:var(--sub);margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:50px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:10px 16px;border:0;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-block{width:100%}
+.btn-ghost{background:none;color:var(--red);padding:6px 10px;font-size:12px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-outline{background:var(--card);border:1px solid var(--border)}
+.record-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;cursor:pointer}
+.record-item:last-child{border-bottom:0}
+.record-info{flex:1;min-width:0}
+.record-info .name{font-size:14px;font-weight:600}
+.record-info .meta{font-size:11px;color:var(--sub);margin-top:3px;display:flex;flex-wrap:wrap;gap:6px}
+.record-info .meta span{white-space:nowrap}
+.record-amount{font-size:18px;font-weight:700;text-align:right;white-space:nowrap;min-width:70px}
+.record-amount.income{color:var(--green)}
+.record-amount.expense{color:var(--red)}
+.record-amount.exchange{color:var(--orange)}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.summary-item{background:var(--bg);border-radius:10px;padding:14px;text-align:center}
+.summary-item .label{font-size:12px;color:var(--sub)}
+.summary-item .value{font-size:22px;font-weight:700;margin-top:4px}
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-tag{padding:5px 14px;border:1px solid var(--border);border-radius:14px;font-size:12px;background:var(--card);cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
+.filter-tag.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.chart-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chart-row .lbl{font-size:12px;min-width:50px;text-align:right}
+.chart-row .bar-wrap{flex:1;height:20px;background:var(--bg);border-radius:10px;overflow:hidden}
+.chart-row .bar{height:100%;border-radius:10px;min-width:4px}
+.chart-row .bar.green{background:linear-gradient(90deg,#10b981,#34d399)}
+.chart-row .bar.red{background:linear-gradient(90deg,#ef4444,#f87171)}
+.chart-row .amt{font-size:11px;white-space:nowrap;color:var(--sub)}
+.total-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:6px}
+.total-bar .label{font-size:14px;font-weight:600}
+.total-bar .value{font-size:16px;font-weight:700}
+.salary-row{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.salary-row:last-child{border-bottom:0}
+.salary-row .sname{font-weight:600;min-width:50px;font-size:13px}
+.salary-row .sval{font-size:13px;white-space:nowrap}
+.section-title{font-size:14px;font-weight:600;color:var(--primary);margin-bottom:8px}
+.empty-state{text-align:center;padding:30px;color:var(--sub);font-size:14px}
+.empty-state .icon{font-size:36px;margin-bottom:8px;display:block}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:18px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;margin:20px}
+.modal h3{font-size:16px;margin-bottom:14px;text-align:center}
+.modal .btn-row{display:flex;gap:8px;margin-top:14px}
+.modal .btn-row button{flex:1}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:0}
+.set-row span{font-size:14px;font-weight:500}
+.set-row input{width:70px;text-align:center;padding:6px;display:inline}
+.pay-summary{background:var(--green-light);padding:10px 12px;border-radius:8px;margin-top:8px;font-size:14px;font-weight:600;color:var(--green);text-align:center}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
-.empty{text-align:center;color:#9ca3af;padding:40px 20px;font-size:14px}
-.set-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6}
-.set-row span{font-size:13px}
-.set-row input{width:80px;padding:6px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;text-align:center}
-.info-box{background:#f0fdf4;padding:10px;border-radius:8px;margin-top:8px;font-size:13px}
-</style>
+.detail-modal{background:var(--card);border-radius:16px;padding:20px;max-width:400px;width:90%}
+.detail-modal .line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px}
+.detail-modal .line:last-child{border-bottom:0}
+.detail-modal .line .val{font-weight:600}
+.date-divider{text-align:center;font-size:11px;color:var(--sub);padding:12px 0 6px;font-weight:500}
+@media(min-width:768px){body{max-width:500px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}header{position:relative}}</style>
 </head>
 <body>
 
-<div id="login-page" style="padding:20px">
-  <div class="login">
-    <h2>🚲 自行车店记账本</h2>
-    <p>喜德盛自行车 · 三店管理</p>
-    <input type="password" id="login-pwd" placeholder="管理员请输入密码">
-    <button class="btn-admin" onclick="doLogin()">管理员登录</button>
-    <button class="btn-staff" onclick="doStaffLogin()">员工记账</button>
-    <div class="err" id="login-err">密码错误</div>
+<!-- Login Screen -->
+<div id="login-screen" class="login-screen">
+  <h2>🚲 自行车店记账本</h2>
+  <p class="subtitle">喜德盛自行车 · 三店管理</p>
+  <div class="login-card">
+    <div class="title">选择登录方式</div>
+    <input type="password" id="login-pwd" placeholder="管理员密码">
+    <button class="btn btn-primary btn-block" onclick="doLogin('admin')">🔐 管理员登录</button>
+    <button class="btn btn-outline btn-block" onclick="doLogin('staff')">👤 员工记账</button>
+    <div id="login-error" class="login-error"></div>
   </div>
 </div>
 
-<div id="app" style="display:none">
-  <div class="header">
-    <h1>🚲 自行车店记账本</h1>
-    <div class="btns">
-      <button onclick="openSettings()" id="btn-settings" style="display:none">⚙️ 设置</button>
-      <button onclick="doLogout()">退出</button>
-    </div>
+<header id="main-header" style="display:none">
+  <h1>🚲 自行车店记账本</h1>
+  <div class="header-btns">
+    <button onclick="showSettings()" id="btn-settings" style="display:none">⚙️</button>
+    <button onclick="logout()">退出</button>
   </div>
+</header>
 
-  <div class="store-bar" id="store-bar">
-    <button onclick="setStore('all')" class="active" data-s="all">全部</button>
-    <button onclick="setStore('东湖印象')" data-s="东湖印象">东湖印象</button>
-    <button onclick="setStore('太古里')" data-s="太古里">太古里</button>
-    <button onclick="setStore('新和县')" data-s="新和县">新和县</button>
-  </div>
-
-  <div class="tab-bar" id="tab-bar">
-    <button onclick="switchTab('income')" class="active">📥 收入</button>
-    <button onclick="switchTab('expense')">📤 支出</button>
-    <button onclick="switchTab('exchange')">💱 换钱</button>
-    <button onclick="switchTab('salary')" class="admin-only" id="tab-salary">💼 工资</button>
-    <button onclick="switchTab('summary')" class="admin-only" id="tab-summary">📊 汇总</button>
-    <button onclick="switchTab('analysis')" class="admin-only" id="tab-analysis">📈 分析</button>
-  </div>
-
-  <div class="content" id="content"></div>
-  <button class="fab" id="fab" onclick="openFab()">+</button>
+<div id="store-bar" class="store-bar" style="display:none">
+  <button class="store-tag active" onclick="switchStore('all')">全部</button>
+  <button class="store-tag" onclick="switchStore('东湖印象')">东湖印象</button>
+  <button class="store-tag" onclick="switchStore('太古里')">太古里</button>
+  <button class="store-tag" onclick="switchStore('新和县')">新和县</button>
 </div>
 
-<!-- Income/Expense Modal -->
-<div class="overlay" id="mdl-rec">
-  <div class="modal">
-    <h3 id="mdl-rec-title">📥 记收入</h3>
-    <label>店铺</label>
-    <select id="rec-store"><option>东湖印象</option><option>太古里</option><option>新和县</option></select>
-    <label>名称 / 备注</label>
-    <input id="rec-name" placeholder="如：喜德盛AD350">
-    <label>品类</label>
-    <select id="rec-cat"><option>整车</option><option>配件</option><option>维修</option><option>租赁</option><option>废品回收</option><option>打包</option><option>二手</option><option>其他</option></select>
-    <label id="lbl-cost">成本 ¥</label>
-    <input type="number" id="rec-cost" placeholder="0" value="0" step="0.01">
-    <label id="lbl-comm" style="display:none">提成比例(自动)</label>
-    <input type="number" id="rec-comm" placeholder="0" value="0" step="0.1" style="display:none" readonly>
-    <label>付款方式（自动合计）</label>
-    <div class="pay-grid">
-      <div><label>现金</label><input type="number" id="pay0" placeholder="0" value="0" step="0.01"></div>
-      <div><label>收款码</label><input type="number" id="pay1" placeholder="0" value="0" step="0.01"></div>
-      <div><label>微信</label><input type="number" id="pay2" placeholder="0" value="0" step="0.01"></div>
-      <div><label>支付宝</label><input type="number" id="pay3" placeholder="0" value="0" step="0.01"></div>
-    </div>
-    <label>合计：<b id="rec-sum">¥0.00</b></label>
-    <label>经办人</label>
-    <input id="rec-handler" list="hl" placeholder="选择或输入">
-    <datalist id="hl"></datalist>
-    <label>日期</label>
-    <input type="date" id="rec-date">
-    <label>备注</label>
-    <textarea id="rec-note" rows="2"></textarea>
-    <div class="btn-row">
-      <button class="btn2" onclick="cls('mdl-rec')">取消</button>
-      <button class="btn1" id="btn-rec-sub" onclick="submitRec()">确认记账</button>
-    </div>
-  </div>
+<div id="tab-bar" class="tab-bar" style="display:none">
+  <button class="tab-btn active" onclick="switchTab('income')">📥 收入</button>
+  <button class="tab-btn" onclick="switchTab('expense')">📤 支出</button>
+  <button class="tab-btn" onclick="switchTab('exchange')">💱 换钱</button>
+  <button class="tab-btn admin-only" onclick="switchTab('salary')">💰 工资</button>
+  <button class="tab-btn admin-only" onclick="switchTab('summary')">📊 汇总</button>
+  <button class="tab-btn admin-only" onclick="switchTab('analysis')">📈 分析</button>
 </div>
 
-<!-- Exchange Modal -->
-<div class="overlay" id="mdl-ex">
-  <div class="modal">
+<div id="page-income" class="page active">
+  <div class="card">
+    <h3>📥 记一笔收入</h3>
+    <div class="form-row"><div><label>日期</label><input type="date" id="inc-date"></div><div><label>店铺</label><select id="inc-store"><option value="东湖印象">东湖印象</option><option value="太古里">太古里</option><option value="新和县">新和县</option></select></div></div>
+    <div class="form-row"><div><label>名称/项目</label><input type="text" id="inc-name" placeholder="如：售出山地车X1"></div><div><label>品类</label><select id="inc-cat"><option value="整车">整车</option><option value="配件">配件</option><option value="维修">维修</option><option value="二手">二手</option><option value="打包">打包</option><option value="废品回收">废品回收</option><option value="租赁">租赁</option><option value="其他">其他</option></select></div></div>
+    <div class="form-row"><div><label>经办人</label><input type="text" id="inc-handler" list="handler-list" placeholder="输入或选择经办人"></div><div><label>成本 ¥</label><input type="number" id="inc-cost" placeholder="0" step="0.01" value="0" oninput="updateIncomeSum()"></div></div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:6px">💡 四种付款方式自动合计</div>
+    <div class="form-row"><div><label>现金 ¥</label><input type="number" id="inc-cash" placeholder="0" step="0.01" value="0" oninput="updateIncomeSum()"></div><div><label>收款码 ¥</label><input type="number" id="inc-qr" placeholder="0" step="0.01" value="0" oninput="updateIncomeSum()"></div></div>
+    <div class="form-row"><div><label>微信 ¥</label><input type="number" id="inc-wx" placeholder="0" step="0.01" value="0" oninput="updateIncomeSum()"></div><div><label>支付宝 ¥</label><input type="number" id="inc-zfb" placeholder="0" step="0.01" value="0" oninput="updateIncomeSum()"></div></div>
+    <div id="inc-sum" class="pay-summary" style="display:none">合计：¥0.00</div>
+    <div class="form-row"><div><label>备注</label><input type="text" id="inc-note" placeholder="选填"></div></div>
+    <button class="btn btn-green btn-block" onclick="saveIncome()" style="margin-top:6px">✅ 记一笔收入</button>
+  </div>
+  <div id="income-list"></div>
+</div>
+
+<div id="page-expense" class="page">
+  <div class="card">
+    <h3>📤 记一笔支出</h3>
+    <div class="form-row"><div><label>日期</label><input type="date" id="exp-date"></div><div><label>店铺</label><select id="exp-store"><option value="东湖印象">东湖印象</option><option value="太古里">太古里</option><option value="新和县">新和县</option></select></div></div>
+    <div class="form-row"><div><label>名称/项目</label><input type="text" id="exp-name" placeholder="如：进货配件"></div><div><label>品类</label><select id="exp-cat"><option value="进货">进货</option><option value="房租">房租</option><option value="水电">水电</option><option value="工资">工资</option><option value="运费">运费</option><option value="工具">工具</option><option value="广告">广告</option><option value="其他">其他</option></select></div></div>
+    <div class="form-row"><div><label>经办人</label><input type="text" id="exp-handler" list="handler-list" placeholder="输入或选择经办人"></div></div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:6px">💡 四种付款方式自动合计</div>
+    <div class="form-row"><div><label>现金 ¥</label><input type="number" id="exp-cash" placeholder="0" step="0.01" value="0" oninput="updateExpenseSum()"></div><div><label>收款码 ¥</label><input type="number" id="exp-qr" placeholder="0" step="0.01" value="0" oninput="updateExpenseSum()"></div></div>
+    <div class="form-row"><div><label>微信 ¥</label><input type="number" id="exp-wx" placeholder="0" step="0.01" value="0" oninput="updateExpenseSum()"></div><div><label>支付宝 ¥</label><input type="number" id="exp-zfb" placeholder="0" step="0.01" value="0" oninput="updateExpenseSum()"></div></div>
+    <div id="exp-sum" class="pay-summary" style="display:none">合计：¥0.00</div>
+    <div class="form-row"><div><label>备注</label><input type="text" id="exp-note" placeholder="选填"></div></div>
+    <button class="btn btn-red btn-block" onclick="saveExpense()" style="margin-top:6px">✅ 记一笔支出</button>
+  </div>
+  <div id="expense-list"></div>
+</div>
+
+<div id="page-exchange" class="page">
+  <div class="card">
     <h3>💱 换钱</h3>
-    <label>店铺</label>
-    <select id="ex-store"><option>东湖印象</option><option>太古里</option><option>新和县</option></select>
-    <label>支出账户</label>
-    <select id="ex-from"><option>现金</option><option>收款码</option><option>微信</option><option>支付宝</option></select>
-    <label>支出金额 ¥</label>
-    <input type="number" id="ex-out" placeholder="0" step="0.01">
-    <label>收到账户</label>
-    <select id="ex-to"><option>收款码</option><option>现金</option><option>微信</option><option>支付宝</option></select>
-    <label>收到金额 ¥</label>
-    <input type="number" id="ex-in" placeholder="0" step="0.01">
-    <label>经办人</label>
-    <input id="ex-handler" list="hl" placeholder="选择或输入">
-    <label>日期</label>
-    <input type="date" id="ex-date">
-    <label>备注</label>
-    <textarea id="ex-note" rows="2"></textarea>
-    <div class="btn-row">
-      <button class="btn2" onclick="cls('mdl-ex')">取消</button>
-      <button class="btn1" onclick="submitEx()">确认换钱</button>
-    </div>
+    <div class="form-row"><div><label>日期</label><input type="date" id="exc-date"></div><div><label>店铺</label><select id="exc-store"><option value="东湖印象">东湖印象</option><option value="太古里">太古里</option><option value="新和县">新和县</option></select></div></div>
+    <div class="form-row"><div><label>备注</label><input type="text" id="exc-note" placeholder="说明"></div></div>
+    <div class="form-row"><div><label>现金变动 ¥</label><input type="number" id="exc-cash" placeholder="正数增加，负数减少" step="0.01" value="0"></div><div><label>收款码变动 ¥</label><input type="number" id="exc-qr" placeholder="正数增加，负数减少" step="0.01" value="0"></div></div>
+    <button class="btn btn-orange btn-block" onclick="saveExchange()" style="margin-top:6px">✅ 记录换钱</button>
+  </div>
+  <div id="exchange-list"></div>
+</div>
+
+<div id="page-salary" class="page">
+  <div class="card">
+    <h3>💰 工资计算</h3>
+    <div class="form-row"><div><label>选择月份</label><input type="month" id="salary-month" onchange="renderSalary()"></div></div>
+    <div id="salary-content"></div>
   </div>
 </div>
 
-<!-- Salary Modal -->
-<div class="overlay" id="mdl-sal">
-  <div class="modal">
-    <h3>💼 计算工资</h3>
-    <label>经办人</label>
-    <select id="sal-handler"></select>
-    <label>月份</label>
-    <input type="month" id="sal-month">
-    <label>底薪 ¥</label>
-    <input type="number" id="sal-base" value="0" step="0.01">
-    <label>扣除 ¥</label>
-    <input type="number" id="sal-deduct" value="0" step="0.01">
-    <div class="info-box">
-      提成自动计算：<b id="sal-comm">¥0.00</b><br>
-      实发工资：<b id="sal-final" style="font-size:18px;color:#16a34a">¥0.00</b>
-    </div>
-    <div class="btn-row">
-      <button class="btn2" onclick="cls('mdl-sal')">取消</button>
-      <button class="btn1" onclick="saveSal()">保存工资</button>
-    </div>
+<div id="page-summary" class="page">
+  <div class="filter-bar" id="summary-store-filter">
+    <button class="filter-tag active" onclick="filterSummary('all')">全部</button>
+    <button class="filter-tag" onclick="filterSummary('东湖印象')">东湖印象</button>
+    <button class="filter-tag" onclick="filterSummary('太古里')">太古里</button>
+    <button class="filter-tag" onclick="filterSummary('新和县')">新和县</button>
   </div>
+  <div id="summary-content"></div>
 </div>
 
-<!-- Settings Modal -->
-<div class="overlay" id="mdl-set">
+<div id="page-analysis" class="page">
+  <div class="filter-bar" id="analysis-store-filter">
+    <button class="filter-tag active" onclick="filterAnalysis('all')">全部</button>
+    <button class="filter-tag" onclick="filterAnalysis('东湖印象')">东湖印象</button>
+    <button class="filter-tag" onclick="filterAnalysis('太古里')">太古里</button>
+    <button class="filter-tag" onclick="filterAnalysis('新和县')">新和县</button>
+  </div>
+  <div id="analysis-content"></div>
+</div>
+
+<div id="modal-settings" class="modal-overlay">
   <div class="modal">
     <h3>⚙️ 设置</h3>
-    <h4 style="font-size:14px;margin-bottom:8px">品类提成比例</h4>
-    <div id="set-list"></div>
-    <h4 style="font-size:14px;margin:16px 0 8px">管理员密码</h4>
-    <input type="password" id="set-pwd" placeholder="新密码（留空不修改）">
-    <div class="btn-row">
-      <button class="btn2" onclick="cls('mdl-set')">关闭</button>
-      <button class="btn1" onclick="saveSet()">保存设置</button>
-    </div>
+    <div style="margin-bottom:14px"><div style="font-weight:600;margin-bottom:8px">品类提成比例 (%)</div><div id="settings-rate-list"></div></div>
+    <div style="margin-bottom:14px"><div style="font-weight:600;margin-bottom:8px">管理员密码</div><input type="text" id="settings-pwd" placeholder="新密码（留空不修改）"></div>
+    <div style="margin-bottom:14px"><div style="font-weight:600;margin-bottom:8px">📋 CSV 模板导入</div><button class="btn btn-outline btn-block" onclick="downloadCSVTemplate()" style="margin-bottom:6px">📥 下载模板</button><input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="importCSV(this)"><button class="btn btn-primary btn-block" onclick="document.getElementById('csv-file-input').click()">📤 导入CSV数据</button></div>
+    <div class="btn-row"><button class="btn btn-outline" onclick="document.getElementById('modal-settings').classList.remove('show')">取消</button><button class="btn btn-primary" onclick="saveSettings()">保存设置</button></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="modal-detail" class="modal-overlay">
+  <div class="detail-modal" id="detail-content"></div>
+</div>
 
+<div id="toast" class="toast"></div>
+<datalist id="handler-list"></datalist>
 <script>
-// ===== DATA =====
-var A = {
-  admin: false, store: 'all', tab: 'income',
-  recs: [], handlers: [], cats: ['整车','配件','维修','租赁','废品回收','打包','二手','其他'],
-  rates: {'整车':10,'配件':25,'维修':25,'租赁':10,'废品回收':70,'打包':50,'二手':25,'其他':10},
-  pwd: 'admin888', sals: [], exs: []
-};
 
-function ld() {
-  try { var d=JSON.parse(localStorage.bike_data); if(d){A.recs=d.recs||[];A.handlers=d.handlers||[];A.cats=d.cats||A.cats;A.rates=d.rates||{'整车':10,'配件':25,'维修':25,'租赁':10,'废品回收':70,'打包':50,'二手':25,'其他':10};A.pwd=d.pwd||'admin888';A.sals=d.sals||[];A.exs=d.exs||[];} } catch(e){}
-}
-function sv() {
-  localStorage.bike_data=JSON.stringify({recs:A.recs,handlers:A.handlers,cats:A.cats,rates:A.rates,pwd:A.pwd,sals:A.sals,exs:A.exs});
-}
+// ====== DATA MODEL ======
+var STORES = ['东湖印象','太古里','新和县'];
+var INCOME_CATS = ['整车','配件','维修','二手','打包','废品回收','租赁','其他'];
+var EXPENSE_CATS = ['进货','房租','水电','工资','运费','工具','广告','其他'];
+var PAY_METHODS = ['现金','收款码','微信','支付宝'];
+var PAY_KEYS = ['cash','qr','wx','zfb'];
+var DEFAULT_RATES = {'整车':10,'配件':25,'维修':25,'二手':25,'打包':50,'废品回收':70,'租赁':10,'其他':10};
+var ADMIN_PWD = 'admin888';
+var currentStore = 'all';
+var currentTab = 'income';
+var userRole = null;
+var summaryStoreFilter = 'all';
+var analysisStoreFilter = 'all';
 
-// ===== LOGIN =====
-function doLogin() {
-  var p=document.getElementById('login-pwd').value.trim();
-  if(p===A.pwd){A.admin=true;showApp();showToast('管理员登录成功');}
-  else document.getElementById('login-err').style.display='block';
-}
-function doStaffLogin() {A.admin=false;showApp();showToast('员工登录成功');}
-function doLogout() {document.getElementById('login-page').style.display='';document.getElementById('app').style.display='none';document.getElementById('login-err').style.display='none';document.getElementById('login-pwd').value='';}
-function showApp() {
-  document.getElementById('login-page').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('btn-settings').style.display=A.admin?'':'none';
-  var tabs=document.querySelectorAll('#tab-bar .admin-only');
-  for(var i=0;i<tabs.length;i++)tabs[i].classList.toggle('visible',A.admin);
-  refresh();
-}
+// ====== STORAGE ======
+function loadData(){try{return JSON.parse(localStorage.getItem('bike_ledger_data'))||{income:[],expense:[],exchange:[]}}catch(e){return{income:[],expense:[],exchange:[]}}}
+function saveData(d){localStorage.setItem('bike_ledger_data',JSON.stringify(d))}
+function loadSettings(){try{return JSON.parse(localStorage.getItem('bike_ledger_settings'))||{rates:{},pwd:ADMIN_PWD}}catch(e){return{rates:{},pwd:ADMIN_PWD}}}
+function saveSettingsData(s){localStorage.setItem('bike_ledger_settings',JSON.stringify(s))}
+function loadSalaryConfig(){try{return JSON.parse(localStorage.getItem('bike_ledger_salary'))||{}}catch(e){return{}}}
+function saveSalaryConfig(sc){localStorage.setItem('bike_ledger_salary',JSON.stringify(sc))}
+function getRate(cat){var s=loadSettings();if(s.rates&&s.rates[cat]!==undefined)return s.rates[cat];return DEFAULT_RATES[cat]||10}
+function fmt(n){return Number(n||0).toFixed(2)}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function getMonth(d){return d?d.slice(0,7):''}
+function filterByStore(records){if(currentStore==='all')return records;return records.filter(function(r){return r.store===currentStore})}
+function staffTimeFilter(records){if(userRole!=='staff')return records;var twoD=Date.now()-2*24*60*60*1000;return records.filter(function(r){return new Date(r.date).getTime()>=twoD})}
 
-// ===== STORE & TAB =====
-function setStore(s) {A.store=s;var bs=document.querySelectorAll('#store-bar button');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('active',bs[i].dataset.s===s);refresh();}
-function switchTab(t) {
-  if(!A.admin&&(t==='salary'||t==='summary'||t==='analysis')){showToast('仅管理员可访问');return;}
-  A.tab=t;
-  var bs=document.querySelectorAll('#tab-bar button');
-  var names={income:'收入',expense:'支出',exchange:'换钱',salary:'工资',summary:'汇总',analysis:'分析'};
-  for(var i=0;i<bs.length;i++)bs[i].classList.toggle('active',bs[i].textContent.indexOf(names[t])>=0);
-  document.getElementById('fab').style.display=(t==='summary'||t==='analysis')?'none':'';
-  refresh();
-}
+// ====== LOGIN ======
+function doLogin(role){var pwd=document.getElementById('login-pwd').value.trim();var errEl=document.getElementById('login-error');if(role==='admin'){var s=loadSettings();var cp=s.pwd||ADMIN_PWD;if(pwd!==cp){errEl.textContent='密码错误';errEl.style.display='block';return}}userRole=role;document.getElementById('login-screen').style.display='none';document.getElementById('main-header').style.display='flex';document.getElementById('store-bar').style.display='flex';document.getElementById('tab-bar').style.display='flex';if(userRole==='admin'){document.getElementById('btn-settings').style.display='';var at=document.querySelectorAll('.admin-only');for(var i=0;i<at.length;i++)at[i].style.display=''}document.getElementById('inc-date').value=new Date().toISOString().slice(0,10);document.getElementById('exp-date').value=new Date().toISOString().slice(0,10);document.getElementById('exc-date').value=new Date().toISOString().slice(0,10);document.getElementById('salary-month').value=new Date().toISOString().slice(0,7);refreshAll()}
+function logout(){userRole=null;document.getElementById('login-screen').style.display='flex';document.getElementById('main-header').style.display='none';document.getElementById('store-bar').style.display='none';document.getElementById('tab-bar').style.display='none';document.getElementById('btn-settings').style.display='none';var ps=document.querySelectorAll('.page');for(var i=0;i<ps.length;i++)ps[i].classList.remove('active');document.getElementById('page-income').classList.add('active')}
 
-// ===== FILTER =====
-function filtered() {
-  var r=A.recs;
-  if(!A.admin){var d=new Date();d.setDate(d.getDate()-2);d.setHours(0,0,0,0);r=r.filter(function(x){return new Date(x.date)>=d;});}
-  if(A.store!=='all')r=r.filter(function(x){return x.store===A.store;});
-  return r;
-}
+// ====== STORE & TAB ======
+function switchStore(store){currentStore=store;var tags=document.querySelectorAll('#store-bar .store-tag');for(var i=0;i<tags.length;i++){tags[i].classList.toggle('active',tags[i].textContent.trim()===(store==='all'?'全部':store))}refreshAll()}
+function switchTab(tab){if(tab==='salary'||tab==='summary'||tab==='analysis'){if(userRole!=='admin'){showToast('仅管理员可访问');return}}currentTab=tab;var btns=document.querySelectorAll('#tab-bar .tab-btn');var tabNames=['收入','支出','换钱','工资','汇总','分析'];var tabIds=['income','expense','exchange','salary','summary','analysis'];for(var i=0;i<btns.length;i++){btns[i].classList.toggle('active',tabIds[i]===tab)}var ps=document.querySelectorAll('.page');for(var i=0;i<ps.length;i++)ps[i].classList.remove('active');var pe=document.getElementById('page-'+tab);if(pe)pe.classList.add('active');if(tab==='summary')renderSummary();if(tab==='analysis')renderAnalysis();if(tab==='salary')renderSalary();if(tab==='income')renderIncome();if(tab==='expense')renderExpense();if(tab==='exchange')renderExchange()}
 
-// ===== REFRESH =====
-function refresh() {
-  var c=document.getElementById('content');
-  var f=filtered();
-  if(A.tab==='income'||A.tab==='expense')renderRecs(c,f.filter(function(x){return x.type===A.tab;}),A.tab);
-  else if(A.tab==='exchange')renderEx(c,f.filter(function(x){return x.type==='exchange';}));
-  else if(A.tab==='summary')renderSum(c);
-  else if(A.tab==='analysis')renderAna(c);
-  else if(A.tab==='salary')renderSalList(c);
-  
-  var dl=document.getElementById('hl');dl.innerHTML='';
-  for(var i=0;i<A.handlers.length;i++)dl.innerHTML+='<option value="'+esc(A.handlers[i])+'">';
-}
+// ====== INCOME ======
+function updateIncomeSum(){var cash=parseFloat(document.getElementById('inc-cash').value)||0;var qr=parseFloat(document.getElementById('inc-qr').value)||0;var wx=parseFloat(document.getElementById('inc-wx').value)||0;var zfb=parseFloat(document.getElementById('inc-zfb').value)||0;var sum=cash+qr+wx+zfb;var el=document.getElementById('inc-sum');if(sum>0){el.style.display='block';el.textContent='合计：¥'+fmt(sum)}else el.style.display='none'}
+function saveIncome(){var data=loadData();var cash=parseFloat(document.getElementById('inc-cash').value)||0;var qr=parseFloat(document.getElementById('inc-qr').value)||0;var wx=parseFloat(document.getElementById('inc-wx').value)||0;var zfb=parseFloat(document.getElementById('inc-zfb').value)||0;var amount=cash+qr+wx+zfb;if(amount<=0){showToast('请输入至少一种付款金额');return}var cost=parseFloat(document.getElementById('inc-cost').value)||0;var cat=document.getElementById('inc-cat').value;var rec={id:Date.now(),type:'income',date:document.getElementById('inc-date').value,store:document.getElementById('inc-store').value,name:document.getElementById('inc-name').value.trim()||'未命名',cat:cat,handler:document.getElementById('inc-handler').value.trim(),cash:cash,qr:qr,wx:wx,zfb:zfb,amount:amount,cost:cost,profit:Math.max(0,amount-cost),commRate:getRate(cat),note:document.getElementById('inc-note').value.trim()};data.income.push(rec);saveData(data);document.getElementById('inc-name').value='';document.getElementById('inc-cash').value='0';document.getElementById('inc-qr').value='0';document.getElementById('inc-wx').value='0';document.getElementById('inc-zfb').value='0';document.getElementById('inc-cost').value='0';document.getElementById('inc-note').value='';document.getElementById('inc-sum').style.display='none';updateHandlerList();renderIncome();showToast('收入记录成功 ✅');sendNotify('收入',rec)}
+function renderIncome(){var data=loadData();var records=staffTimeFilter(filterByStore(data.income));records.sort(function(a,b){return b.id-a.id});var h='';var ld='';for(var i=0;i<records.length;i++){var r=records[i];var dl=r.date;if(dl!==ld){h+='<div class="date-divider">—— '+dl+' ——</div>';ld=dl}var catLabel=r.cat+(r.name?' · '+r.name:'');h+='<div class="record-item" onclick="showDetail('+r.id+')"><div class="record-info"><div class="name">'+esc(catLabel)+'</div><div class="meta">';if(r.store)h+='<span>📍'+esc(r.store)+'</span>';if(r.handler)h+='<span>👤'+esc(r.handler)+'</span>';if(r.cost>0)h+='<span>成本¥'+fmt(r.cost)+'</span>';if(userRole==='admin'&&r.profit>0)h+='<span>利润¥'+fmt(r.profit)+'</span>';h+='</div></div><div class="record-amount income">¥'+fmt(r.amount)+'</div></div>'}if(!h)h='<div class="empty-state"><span class="icon">📥</span>暂无收入记录</div>';document.getElementById('income-list').innerHTML=h}
 
-function total(r){return(parseFloat(r.cash)||0)+(parseFloat(r.qr)||0)+(parseFloat(r.wx)||0)+(parseFloat(r.zfb)||0);}
+// ====== EXPENSE ======
+function updateExpenseSum(){var cash=parseFloat(document.getElementById('exp-cash').value)||0;var qr=parseFloat(document.getElementById('exp-qr').value)||0;var wx=parseFloat(document.getElementById('exp-wx').value)||0;var zfb=parseFloat(document.getElementById('exp-zfb').value)||0;var sum=cash+qr+wx+zfb;var el=document.getElementById('exp-sum');if(sum>0){el.style.display='block';el.textContent='合计：¥'+fmt(sum)}else el.style.display='none'}
+function saveExpense(){var data=loadData();var cash=parseFloat(document.getElementById('exp-cash').value)||0;var qr=parseFloat(document.getElementById('exp-qr').value)||0;var wx=parseFloat(document.getElementById('exp-wx').value)||0;var zfb=parseFloat(document.getElementById('exp-zfb').value)||0;var amount=cash+qr+wx+zfb;if(amount<=0){showToast('请输入至少一种付款金额');return}var rec={id:Date.now(),type:'expense',date:document.getElementById('exp-date').value,store:document.getElementById('exp-store').value,name:document.getElementById('exp-name').value.trim()||'未命名',cat:document.getElementById('exp-cat').value,handler:document.getElementById('exp-handler').value.trim(),cash:cash,qr:qr,wx:wx,zfb:zfb,amount:amount,note:document.getElementById('exp-note').value.trim()};data.expense.push(rec);saveData(data);document.getElementById('exp-name').value='';document.getElementById('exp-cash').value='0';document.getElementById('exp-qr').value='0';document.getElementById('exp-wx').value='0';document.getElementById('exp-zfb').value='0';document.getElementById('exp-note').value='';document.getElementById('exp-sum').style.display='none';updateHandlerList();renderExpense();showToast('支出记录成功 ✅');sendNotify('支出',rec)}
+function renderExpense(){var data=loadData();var records=staffTimeFilter(filterByStore(data.expense));records.sort(function(a,b){return b.id-a.id});var h='';var ld='';for(var i=0;i<records.length;i++){var r=records[i];var dl=r.date;if(dl!==ld){h+='<div class="date-divider">—— '+dl+' ——</div>';ld=dl}var catLabel=r.cat+(r.name?' · '+r.name:'');h+='<div class="record-item" onclick="showDetail('+r.id+')"><div class="record-info"><div class="name">'+esc(catLabel)+'</div><div class="meta">';if(r.store)h+='<span>📍'+esc(r.store)+'</span>';if(r.handler)h+='<span>👤'+esc(r.handler)+'</span>';h+='</div></div><div class="record-amount expense">¥'+fmt(r.amount)+'</div></div>'}if(!h)h='<div class="empty-state"><span class="icon">📤</span>暂无支出记录</div>';document.getElementById('expense-list').innerHTML=h}
 
-function renderRecs(c,rs,tp) {
-  if(!rs.length){c.innerHTML='<div class="empty">暂无记录</div>';return;}
-  rs.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  var h='';
-  for(var i=0;i<rs.length;i++){
-    var r=rs[i],tt=total(r),cl=tp==='income'?'in':'out',pre=tp==='income'?'+':'−';
-    h+='<div class="card"><div class="row"><span class="tag">'+esc(r.store)+'</span><span style="font-size:11px;color:#6b7280">'+r.date+'</span></div>';
-    h+='<div class="row" style="margin-top:6px"><b>'+esc(r.name||'未命名')+'</b><span class="amt '+cl+'">'+pre+'¥'+tt.toFixed(2)+'</span></div>';
-    if(r.cost&&parseFloat(r.cost)>0){h+='<div class="meta">成本 ¥'+parseFloat(r.cost).toFixed(2)+' | '+esc(r.cat||'其他');if(A.admin)h+=' | 提成'+(r.comm||0)+'%';h+='</div>';}
-    var ps=[];if(parseFloat(r.cash)>0)ps.push('现金¥'+parseFloat(r.cash).toFixed(2));if(parseFloat(r.qr)>0)ps.push('收款码¥'+parseFloat(r.qr).toFixed(2));if(parseFloat(r.wx)>0)ps.push('微信¥'+parseFloat(r.wx).toFixed(2));if(parseFloat(r.zfb)>0)ps.push('支付宝¥'+parseFloat(r.zfb).toFixed(2));
-    h+='<div class="meta">'+ps.join(' + ')+' | 经办 '+esc(r.handler||'')+'</div>';
-    if(r.note)h+='<div class="meta">备注: '+esc(r.note)+'</div>';
-    h+='</div>';
-  }
-  c.innerHTML=h;
-}
+// ====== EXCHANGE ======
+function saveExchange(){var data=loadData();var cash=parseFloat(document.getElementById('exc-cash').value)||0;var qr=parseFloat(document.getElementById('exc-qr').value)||0;if(cash===0&&qr===0){showToast('请输入变动金额');return}var rec={id:Date.now(),type:'exchange',date:document.getElementById('exc-date').value,store:document.getElementById('exc-store').value,cash:cash,qr:qr,note:document.getElementById('exc-note').value.trim()};data.exchange.push(rec);saveData(data);document.getElementById('exc-cash').value='0';document.getElementById('exc-qr').value='0';document.getElementById('exc-note').value='';renderExchange();showToast('换钱记录成功 ✅')}
+function renderExchange(){var data=loadData();var records=staffTimeFilter(filterByStore(data.exchange));records.sort(function(a,b){return b.id-a.id});var h='';var ld='';for(var i=0;i<records.length;i++){var r=records[i];var dl=r.date;if(dl!==ld){h+='<div class="date-divider">—— '+dl+' ——</div>';ld=dl}var desc='现金'+(r.cash>=0?'+':'')+fmt(r.cash)+' / 收款码'+(r.qr>=0?'+':'')+fmt(r.qr);h+='<div class="record-item" onclick="showDetail('+r.id+')"><div class="record-info"><div class="name">💱 换钱</div><div class="meta">';if(r.store)h+='<span>📍'+esc(r.store)+'</span>';h+='<span>'+esc(desc)+'</span>';if(r.note)h+='<span>💬'+esc(r.note)+'</span>';h+='</div></div><div class="record-amount exchange">'+esc(desc)+'</div></div>'}if(!h)h='<div class="empty-state"><span class="icon">💱</span>暂无换钱记录</div>';document.getElementById('exchange-list').innerHTML=h}
 
-function renderEx(c,rs) {
-  if(!rs.length){c.innerHTML='<div class="empty">暂无换钱记录</div>';return;}
-  rs.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  var h='';
-  for(var i=0;i<rs.length;i++){
-    var r=rs[i];
-    h+='<div class="card"><div class="row"><span class="tag">'+esc(r.store)+'</span><span style="font-size:11px;color:#6b7280">'+r.date+'</span></div>';
-    h+='<div style="margin-top:6px">💱 '+esc(r.from)+' → '+esc(r.to)+': <b>出 ¥'+parseFloat(r.out).toFixed(2)+'</b> / <b>入 ¥'+parseFloat(r.in).toFixed(2)+'</b></div>';
-    h+='<div class="meta">经办 '+esc(r.handler||'')+'</div>';
-    if(r.note)h+='<div class="meta">备注: '+esc(r.note)+'</div>';
-    h+='</div>';
-  }
-  c.innerHTML=h;
-}
+// ====== SUMMARY ======
+function filterSummary(store){summaryStoreFilter=store;var tags=document.querySelectorAll('#summary-store-filter .filter-tag');for(var i=0;i<tags.length;i++){tags[i].classList.toggle('active',tags[i].textContent.trim()===(store==='all'?'全部':store))}renderSummary()}
+function renderSummary(){if(userRole!=='admin')return;var data=loadData();var inc=data.income,exp=data.expense;if(summaryStoreFilter!=='all'){inc=inc.filter(function(r){return r.store===summaryStoreFilter});exp=exp.filter(function(r){return r.store===summaryStoreFilter})}var ti=0,tc=0;for(var i=0;i<inc.length;i++){ti+=inc[i].amount||0;tc+=inc[i].cost||0}var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amount||0;var net=ti-te;var profitRate=ti>0?((ti-tc)/ti*100):0;var ic={};for(var i=0;i<inc.length;i++){var c=inc[i].cat;ic[c]=(ic[c]||0)+inc[i].amount}var ec={};for(var i=0;i<exp.length;i++){var c=exp[i].cat;ec[c]=(ec[c]||0)+exp[i].amount}var h='<div class="summary-grid">';h+='<div class="summary-item"><div class="label">总收入</div><div class="value green">¥'+fmt(ti)+'</div></div>';h+='<div class="summary-item"><div class="label">总成本</div><div class="value">¥'+fmt(tc)+'</div></div>';h+='<div class="summary-item"><div class="label">总支出</div><div class="value red">¥'+fmt(te)+'</div></div>';h+='<div class="summary-item"><div class="label">净利润</div><div class="value" style="color:'+(net>=0?'var(--green)':'var(--red)')+'">¥'+fmt(net)+'</div></div>';h+='</div><div class="summary-item" style="text-align:center;margin-top:6px"><div class="label">利润率</div><div class="value" style="color:var(--primary)">'+fmt(profitRate)+'%</div></div>';h+='<div class="card" style="margin-top:10px"><h3>📍 分店汇总</h3>';for(var s=0;s<STORES.length;s++){var si=0,se=0;for(var i=0;i<data.income.length;i++){if(data.income[i].store===STORES[s])si+=data.income[i].amount||0}for(var i=0;i<data.expense.length;i++){if(data.expense[i].store===STORES[s])se+=data.expense[i].amount||0}h+='<div class="total-bar"><span class="label">'+STORES[s]+'</span><span class="value" style="color:'+(si-se>=0?'var(--green)':'var(--red)')+'">¥'+fmt(si-se)+' (收¥'+fmt(si)+'/支¥'+fmt(se)+')</span></div>'}h+='</div>';h+='<div class="card"><h3>📂 收入品类</h3>';var icArr=[];for(var k in ic)icArr.push([k,ic[k]]);icArr.sort(function(a,b){return b[1]-a[1]});if(icArr.length===0)h+='<div class="empty-state">暂无数据</div>';else for(var i=0;i<icArr.length;i++)h+='<div class="total-bar"><span class="label">'+icArr[i][0]+'</span><span class="value" style="color:var(--green)">¥'+fmt(icArr[i][1])+'</span></div>';h+='</div>';h+='<div class="card"><h3>📂 支出品类</h3>';var ecArr=[];for(var k in ec)ecArr.push([k,ec[k]]);ecArr.sort(function(a,b){return b[1]-a[1]});if(ecArr.length===0)h+='<div class="empty-state">暂无数据</div>';else for(var i=0;i<ecArr.length;i++)h+='<div class="total-bar"><span class="label">'+ecArr[i][0]+'</span><span class="value" style="color:var(--red)">¥'+fmt(ecArr[i][1])+'</span></div>';h+='</div>';document.getElementById('summary-content').innerHTML=h}
 
-function renderSum(c) {
-  if(!A.admin){c.innerHTML='<div class="empty">仅管理员可查看</div>';return;}
-  var stores=A.store==='all'?['东湖印象','太古里','新和县']:[A.store],h='<div class="summary">';
-  for(var s=0;s<stores.length;s++){
-    var rs=filtered().filter(function(x){return x.store===stores[s];}),inc=0,exp=0,cost=0;
-    for(var i=0;i<rs.length;i++){var t=total(rs[i]);if(rs[i].type==='income'){inc+=t;cost+=parseFloat(rs[i].cost)||0;}else if(rs[i].type==='expense')exp+=t;}
-    var mar=inc>0?((inc-cost)/inc*100):0;
-    h+='<div class="scard"><div style="font-weight:700;margin-bottom:4px">'+esc(stores[s])+'</div>';
-    h+='<div class="lbl">收入</div><div class="num" style="color:#16a34a">¥'+inc.toFixed(2)+'</div>';
-    h+='<div class="lbl">支出</div><div class="num" style="color:#dc2626">¥'+exp.toFixed(2)+'</div>';
-    h+='<div class="lbl">成本</div><div class="num">¥'+cost.toFixed(2)+'</div>';
-    h+='<div class="lbl">净利润率</div><div class="num" style="color:#2563eb">'+mar.toFixed(1)+'%</div>';
-    h+='</div>';
-  }
-  c.innerHTML=h+'</div>';
-}
+// ====== ANALYSIS ======
+function filterAnalysis(store){analysisStoreFilter=store;var tags=document.querySelectorAll('#analysis-store-filter .filter-tag');for(var i=0;i<tags.length;i++){tags[i].classList.toggle('active',tags[i].textContent.trim()===(store==='all'?'全部':store))}renderAnalysis()}
+function renderAnalysis(){if(userRole!=='admin')return;var data=loadData();var inc=data.income,exp=data.expense;if(analysisStoreFilter!=='all'){inc=inc.filter(function(r){return r.store===analysisStoreFilter});exp=exp.filter(function(r){return r.store===analysisStoreFilter})}var ti=0,te=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amount||0;for(var i=0;i<exp.length;i++)te+=exp[i].amount||0;var h='<div class="card"><h3>📊 收入品类分布</h3>';var ic=[];for(var i=0;i<INCOME_CATS.length;i++){var s=0;for(var j=0;j<inc.length;j++){if(inc[j].cat===INCOME_CATS[i])s+=inc[j].amount||0}if(s>0)ic.push([INCOME_CATS[i],s])}ic.sort(function(a,b){return b[1]-a[1]});var mx=ic.length>0?ic[0][1]:1;for(var i=0;i<ic.length;i++){var p=ti>0?(ic[i][1]/ti*100):0;h+='<div class="chart-row"><span class="lbl">'+ic[i][0]+'</span><div class="bar-wrap"><div class="bar green" style="width:'+(ic[i][1]/mx*100)+'%"></div></div><span class="amt">¥'+fmt(ic[i][1])+' ('+fmt(p)+'%)</span></div>'}if(ic.length===0)h+='<div class="empty-state">暂无数据</div>';h+='</div>';h+='<div class="card"><h3>📊 支出品类分布</h3>';var ec=[];for(var i=0;i<EXPENSE_CATS.length;i++){var s=0;for(var j=0;j<exp.length;j++){if(exp[j].cat===EXPENSE_CATS[i])s+=exp[j].amount||0}if(s>0)ec.push([EXPENSE_CATS[i],s])}ec.sort(function(a,b){return b[1]-a[1]});var mxe=ec.length>0?ec[0][1]:1;for(var i=0;i<ec.length;i++){var p=te>0?(ec[i][1]/te*100):0;h+='<div class="chart-row"><span class="lbl">'+ec[i][0]+'</span><div class="bar-wrap"><div class="bar red" style="width:'+(ec[i][1]/mxe*100)+'%"></div></div><span class="amt">¥'+fmt(ec[i][1])+' ('+fmt(p)+'%)</span></div>'}if(ec.length===0)h+='<div class="empty-state">暂无数据</div>';h+='</div>';h+='<div class="card"><h3>👥 经办人提成</h3>';var cm={};for(var i=0;i<inc.length;i++){var r=inc[i];if(r.handler){cm[r.handler]=(cm[r.handler]||0)+Math.max(0,(r.amount||0)-(r.cost||0))*(r.commRate||0)/100}}var hl=[];for(var k in cm)hl.push([k,cm[k]]);hl.sort(function(a,b){return b[1]-a[1]});if(hl.length===0)h+='<div class="empty-state"><span class="icon">👥</span>暂无提成数据</div>';else for(var i=0;i<hl.length;i++)h+='<div class="total-bar"><span class="label">'+hl[i][0]+'</span><span class="value" style="color:var(--green)">¥'+fmt(hl[i][1])+'</span></div>';h+='</div>';document.getElementById('analysis-content').innerHTML=h}
 
-function renderAna(c) {
-  if(!A.admin){c.innerHTML='<div class="empty">仅管理员可查看</div>';return;}
-  var rs=filtered().filter(function(x){return x.type==='income';}),cm={},hm={};
-  for(var i=0;i<rs.length;i++){
-    var cat=rs[i].cat||'其他',hnd=rs[i].handler||'未知',t=total(rs[i]),co=parseFloat(rs[i].cost)||0;
-    if(!cm[cat])cm[cat]={n:0,t:0,c:0};cm[cat].n++;cm[cat].t+=t;cm[cat].c+=co;
-    if(!hm[hnd])hm[hnd]={n:0,t:0,c:0};hm[hnd].n++;hm[hnd].t+=t;hm[hnd].c+=co;
-  }
-  var h='<h4 style="margin-bottom:8px">按品类</h4>';
-  for(var k in cm)h+='<div class="card"><div class="row"><b>'+esc(k)+'</b><span>'+cm[k].n+'笔 | ¥'+cm[k].t.toFixed(2)+'</span></div><div class="meta">成本 ¥'+cm[k].c.toFixed(2)+' | 毛利 ¥'+(cm[k].t-cm[k].c).toFixed(2)+'</div></div>';
-  h+='<h4 style="margin:12px 0 8px">按经办人</h4>';
-  for(var k in hm)h+='<div class="card"><div class="row"><b>'+esc(k)+'</b><span>'+hm[k].n+'笔 | ¥'+hm[k].t.toFixed(2)+'</span></div><div class="meta">提成预估 ¥'+Math.max(0,(hm[k].t-hm[k].c)*(A.rates[k]||10)/100).toFixed(2)+'</div></div>';
-  c.innerHTML=h;
-}
+// ====== SALARY ======
+function renderSalary(){if(userRole!=='admin')return;var data=loadData();var sc=loadSalaryConfig();var me=document.getElementById('salary-month');var month=me?me.value:'';var inc=data.income;if(month)inc=inc.filter(function(r){return getMonth(r.date)===month});var cm={};for(var i=0;i<inc.length;i++){var r=inc[i];if(r.handler){cm[r.handler]=(cm[r.handler]||0)+Math.max(0,(r.amount||0)-(r.cost||0))*(r.commRate||0)/100}}var nm={};for(var i=0;i<data.income.length;i++){if(data.income[i].handler)nm[data.income[i].handler]=true}for(var i=0;i<data.expense.length;i++){if(data.expense[i].handler)nm[data.expense[i].handler]=true}for(var k in sc)nm[k]=true;var names=[];for(var k in nm)names.push(k);names.sort();if(!me.value)me.value=new Date().toISOString().slice(0,7);var h='<div class="card"><h3>💵 工资计算 ('+(month||'全部')+')</h3>';var tp=0;if(names.length===0)h+='<div class="empty-state">暂无经办人数据</div>';else for(var i=0;i<names.length;i++){var n=names[i],cfg=sc[n]||{base:0,deduction:0},com=cm[n]||0,sal=cfg.base+com-cfg.deduction;tp+=sal;h+='<div class="salary-row"><span class="sname">'+esc(n)+'</span>';h+='<span style="font-size:11px">底薪</span><input type="number" value="'+cfg.base+'" style="width:60px;text-align:center;padding:3px" onchange="var r=this.closest(\'.salary-row\');var nm=r.querySelector(\'.sname\').textContent;updateBaseSalary(nm,this.value)">';h+='<span class="sval" style="color:var(--green);font-size:12px">提成 ¥'+fmt(com)+'</span>';h+='<span style="font-size:11px">扣除</span><input type="number" value="'+cfg.deduction+'" style="width:60px;text-align:center;padding:3px;color:var(--red)" onchange="var r=this.closest(\'.salary-row\');var nm=r.querySelector(\'.sname\').textContent;updateDeduction(nm,this.value)">';h+='<span class="sval" style="font-weight:700">实发 ¥'+fmt(sal)+'</span></div>'}h+='<div class="total-bar" style="margin-top:10px"><span class="label">合计实发</span><span class="value" style="color:var(--primary)">¥'+fmt(tp)+'</span></div></div>';document.getElementById('salary-content').innerHTML=h}
+function updateBaseSalary(n,v){var sc=loadSalaryConfig();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].base=parseFloat(v)||0;saveSalaryConfig(sc);renderSalary()}
+function updateDeduction(n,v){var sc=loadSalaryConfig();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].deduction=parseFloat(v)||0;saveSalaryConfig(sc);renderSalary()}
 
-function renderSalList(c) {
-  if(!A.admin){c.innerHTML='<div class="empty">仅管理员可查看</div>';return;}
-  if(!A.sals.length){c.innerHTML='<div class="empty">暂无工资记录</div>';return;}
-  A.sals.sort(function(a,b){return b.month.localeCompare(a.month);});
-  var h='';
-  for(var i=0;i<A.sals.length;i++){
-    var s=A.sals[i];
-    h+='<div class="card"><div class="row"><b>'+esc(s.handler)+'</b><span style="font-size:11px;color:#6b7280">'+s.month+'</span></div>';
-    h+='<div style="margin-top:4px">底薪 ¥'+parseFloat(s.base).toFixed(2)+' + 提成 ¥'+parseFloat(s.comm).toFixed(2)+' − 扣除 ¥'+parseFloat(s.deduct).toFixed(2)+'</div>';
-    h+='<div style="font-size:16px;font-weight:700;color:#16a34a">实发 ¥'+parseFloat(s.final).toFixed(2)+'</div></div>';
-  }
-  c.innerHTML=h;
-}
+// ====== DETAIL MODAL ======
+function showDetail(id){var data=loadData();var all=data.income.concat(data.expense).concat(data.exchange);var rec=null;for(var i=0;i<all.length;i++){if(all[i].id===id){rec=all[i];break}}if(!rec)return;var h='';if(rec.type==='income'){var profit=(rec.amount||0)-(rec.cost||0);var comm=userRole==='admin'?(Math.max(0,profit)*(rec.commRate||0)/100):null;h+='<h3>📥 收入详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--green)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';h+='<div class="line"><span>成本</span><span class="val">¥'+fmt(rec.cost||0)+'</span></div>';h+='<div class="line"><span>利润</span><span class="val" style="color:var(--green)">¥'+fmt(profit)+'</span></div>';if(comm!==null)h+='<div class="line"><span>提成 ('+(rec.commRate||0)+'%)</span><span class="val" style="color:var(--primary)">¥'+fmt(comm)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='expense'){h+='<h3>📤 支出详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--red)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='exchange'){h+='<h3>💱 换钱详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>现金变动</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';h+='<div class="line"><span>收款码变动</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}h+='<button class="btn btn-outline btn-block" style="margin-top:12px;color:var(--red)" onclick="deleteRecord('+id+')">🗑 删除记录</button>';document.getElementById('detail-content').innerHTML=h;document.getElementById('modal-detail').classList.add('show')}
+function deleteRecord(id){if(!confirm('确定要删除这条记录吗？此操作不可恢复。'))return;var data=loadData();for(var k in data){data[k]=data[k].filter(function(r){return r.id!==id})}saveData(data);document.getElementById('modal-detail').classList.remove('show');refreshAll();showToast('已删除')}
 
-// ===== MODALS =====
-function openFab() {
-  if(A.tab==='salary'){openSal();return;}
-  if(A.tab==='exchange'){
-    document.getElementById('ex-store').value=A.store!=='all'?A.store:'东湖印象';
-    document.getElementById('ex-out').value='0';document.getElementById('ex-in').value='0';
-    document.getElementById('ex-handler').value='';document.getElementById('ex-note').value='';
-    document.getElementById('ex-date').value=new Date().toISOString().slice(0,10);
-    document.getElementById('mdl-ex').classList.add('show');return;
-  }
-  openRec();
-}
+// ====== SETTINGS ======
+function showSettings(){var s=loadSettings();var list=document.getElementById('settings-rate-list');list.innerHTML='';for(var i=0;i<INCOME_CATS.length;i++){var cat=INCOME_CATS[i],rate=(s.rates&&s.rates[cat]!==undefined)?s.rates[cat]:(DEFAULT_RATES[cat]||10);list.innerHTML+='<div class="set-row"><span>'+cat+'</span><div><input type="number" value="'+rate+'" step="0.1" class="rate-input" data-cat="'+cat+'" style="width:70px;text-align:center" onchange="this.value=Math.max(0,Math.min(100,parseFloat(this.value)||0))"> %</div></div>'}document.getElementById('settings-pwd').value='';document.getElementById('modal-settings').classList.add('show')}
+function saveSettings(){var s=loadSettings();if(!s.rates)s.rates={};var inputs=document.querySelectorAll('.rate-input');for(var i=0;i<inputs.length;i++){s.rates[inputs[i].dataset.cat]=parseFloat(inputs[i].value)||0}var np=document.getElementById('settings-pwd').value.trim();if(np)s.pwd=np;saveSettingsData(s);document.getElementById('modal-settings').classList.remove('show');showToast('设置已保存 ✅');renderSalary()}
 
-function openRec() {
-  var isInc=A.tab!=='expense';
-  document.getElementById('mdl-rec-title').textContent=isInc?'📥 记收入':'📤 记支出';
-  document.getElementById('lbl-cost').style.display=isInc?'':'none';
-  document.getElementById('rec-cost').style.display=isInc?'':'none';
-  document.getElementById('lbl-comm').style.display=(isInc&&A.admin)?'':'none';
-  document.getElementById('rec-comm').style.display=(isInc&&A.admin)?'':'none';
-  document.getElementById('btn-rec-sub').dataset.type=isInc?'income':'expense';
-  document.getElementById('rec-store').value=A.store!=='all'?A.store:'东湖印象';
-  document.getElementById('rec-name').value='';document.getElementById('rec-cost').value='0';
-  document.getElementById('rec-comm').value='0';document.getElementById('rec-handler').value='';
-  document.getElementById('rec-note').value='';document.getElementById('rec-date').value=new Date().toISOString().slice(0,10);
-  document.getElementById('pay0').value='0';document.getElementById('pay1').value='0';
-  document.getElementById('pay2').value='0';document.getElementById('pay3').value='0';
-  document.getElementById('rec-sum').textContent='¥0.00';
-  document.getElementById('mdl-rec').classList.add('show');
-}
+// ====== CSV IMPORT ======
+function downloadCSVTemplate(){var header='类型,日期,店铺,名称,品类,经办人,现金,收款码,微信,支付宝,成本,备注\n';var ex=['收入,2024-01-15,东湖印象,售出山地车,整车,张三,1000,500,0,0,800,含配件','支出,2024-01-15,太古里,进货配件,进货,李四,0,0,200,0,,运费','收入,2024-01-16,新和县,维修服务,维修,王五,0,0,50,0,10,换胎'].join('\n');var csv=header+ex;var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='自行车店记账模板.csv';a.click();URL.revokeObjectURL(url);showToast('模板已下载')}
+function importCSV(input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){var text=e.target.result;if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);var lines=text.split(/\r?\n/).filter(function(l){return l.trim()});if(lines.length<2){showToast('CSV文件为空或格式错误');return}var data=loadData();var count=0;for(var i=1;i<lines.length;i++){var cols=parseCSVLine(lines[i]);if(cols.length<4)continue;var type=cols[0].trim();var date=cols[1].trim();if(!date||!/\d{4}-\d{2}-\d{2}/.test(date))continue;if(type==='收入'){var cash=parseFloat(cols[6])||0,qr=parseFloat(cols[7])||0,wx=parseFloat(cols[8])||0,zfb=parseFloat(cols[9])||0;var amt=cash+qr+wx+zfb;var cost=parseFloat(cols[10])||0;var cat=cols[4]?cols[4].trim():'其他';if(INCOME_CATS.indexOf(cat)<0)cat='其他';data.income.push({id:Date.now()+count,type:'income',date:date,store:cols[2].trim()||'东湖印象',name:cols[3].trim()||'导入记录',cat:cat,handler:cols[5].trim()||'',cash:cash,qr:qr,wx:wx,zfb:zfb,amount:amt,cost:cost,profit:Math.max(0,amt-cost),commRate:getRate(cat),note:cols[11]?cols[11].trim():''});count++}else if(type==='支出'){var cash=parseFloat(cols[6])||0,qr=parseFloat(cols[7])||0,wx=parseFloat(cols[8])||0,zfb=parseFloat(cols[9])||0;var amt=cash+qr+wx+zfb;var cat=cols[4]?cols[4].trim():'其他';if(EXPENSE_CATS.indexOf(cat)<0)cat='其他';data.expense.push({id:Date.now()+count+1000000,type:'expense',date:date,store:cols[2].trim()||'东湖印象',name:cols[3].trim()||'导入记录',cat:cat,handler:cols[5].trim()||'',cash:cash,qr:qr,wx:wx,zfb:zfb,amount:amt,note:cols[11]?cols[11].trim():''});count++}}saveData(data);updateHandlerList();refreshAll();showToast('成功导入 '+count+' 条记录 ✅')};reader.readAsText(file,'UTF-8');input.value=''}
+function parseCSVLine(line){var result=[];var current='';var inQuotes=false;for(var i=0;i<line.length;i++){var ch=line[i];if(inQuotes){if(ch==='"'){if(i+1<line.length&&line[i+1]==='"'){current+='"';i++}else inQuotes=false}else current+=ch}else{if(ch==='"')inQuotes=true;else if(ch===','){result.push(current);current=''}else current+=ch}}result.push(current);return result}
 
-function updSum() {
-  var s=(parseFloat(document.getElementById('pay0').value)||0)+(parseFloat(document.getElementById('pay1').value)||0)+(parseFloat(document.getElementById('pay2').value)||0)+(parseFloat(document.getElementById('pay3').value)||0);
-  document.getElementById('rec-sum').textContent='¥'+s.toFixed(2);
-}
+// ====== HANDLER LIST ======
+function updateHandlerList(){var data=loadData();var handlers={};for(var i=0;i<data.income.length;i++){if(data.income[i].handler)handlers[data.income[i].handler]=true}for(var i=0;i<data.expense.length;i++){if(data.expense[i].handler)handlers[data.expense[i].handler]=true}var list=document.getElementById('handler-list');list.innerHTML='';var names=[];for(var k in handlers)names.push(k);names.sort();for(var i=0;i<names.length;i++)list.innerHTML+='<option value="'+esc(names[i])+'">'}
 
-function submitRec() {
-  var tp=document.getElementById('btn-rec-sub').dataset.type;
-  var store=document.getElementById('rec-store').value,name=document.getElementById('rec-name').value.trim();
-  var cat=document.getElementById('rec-cat').value,cost=parseFloat(document.getElementById('rec-cost').value)||0;
-  var comm=A.rates[cat]||10;handler=document.getElementById('rec-handler').value.trim();
-  var date=document.getElementById('rec-date').value,note=document.getElementById('rec-note').value.trim();
-  var cash=parseFloat(document.getElementById('pay0').value)||0,qr=parseFloat(document.getElementById('pay1').value)||0;
-  var wx=parseFloat(document.getElementById('pay2').value)||0,zfb=parseFloat(document.getElementById('pay3').value)||0;
-  var tt=cash+qr+wx+zfb;
-  if(tt<=0){showToast('请输入金额');return;}
-  if(!name){showToast('请输入名称');return;}
-  if(!date){showToast('请选择日期');return;}
-  A.recs.push({type:tp,store:store,name:name,cat:cat,cost:cost,comm:comm,handler:handler,date:date,note:note,cash:cash,qr:qr,wx:wx,zfb:zfb,id:Date.now()});
-  if(handler&&A.handlers.indexOf(handler)===-1)A.handlers.push(handler);
-  sv();cls('mdl-rec');refresh();showToast('记账成功 ✓');
-  notify(tp==='income'?'收入':'支出',store,name,tt);
-}
+// ====== NOTIFICATION ======
+function sendNotify(type,rec){var name=rec.name||rec.cat||'';var amt=rec.amount||0;var msg='【自行车店】'+type+'通知\n店铺：'+(rec.store||'')+'\n项目：'+name+'\n金额：¥'+fmt(amt)+'\n时间：'+new Date().toLocaleString();try{fetch('/api/mailer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject:'自行车店记账 - '+type+' - '+name,body:msg.replace(/\n/g,'<br>')})}).catch(function(){})}catch(e){}}
 
-function submitEx() {
-  var store=document.getElementById('ex-store').value,from=document.getElementById('ex-from').value;
-  var out=parseFloat(document.getElementById('ex-out').value)||0,to=document.getElementById('ex-to').value;
-  var inn=parseFloat(document.getElementById('ex-in').value)||0,handler=document.getElementById('ex-handler').value.trim();
-  var date=document.getElementById('ex-date').value,note=document.getElementById('ex-note').value.trim();
-  if(out<=0&&inn<=0){showToast('请输入金额');return;}
-  if(!date){showToast('请选择日期');return;}
-  if(from===to){showToast('支出和收到账户不能相同');return;}
-  A.exs.push({type:'exchange',store:store,from:from,out:out,to:to,in:inn,handler:handler,date:date,note:note,id:Date.now()});
-  if(handler&&A.handlers.indexOf(handler)===-1)A.handlers.push(handler);
-  sv();cls('mdl-ex');refresh();showToast('换钱记录成功 ✓');
-}
+// ====== UTILS ======
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000)}
+function refreshAll(){renderIncome();renderExpense();renderExchange();if(userRole==='admin'){renderSummary();renderAnalysis();renderSalary()}}
 
-// ===== SALARY =====
-function openSal() {
-  var sel=document.getElementById('sal-handler');sel.innerHTML='';
-  for(var i=0;i<A.handlers.length;i++)sel.innerHTML+='<option value="'+esc(A.handlers[i])+'">'+esc(A.handlers[i])+'</option>';
-  document.getElementById('sal-month').value=new Date().toISOString().slice(0,7);
-  document.getElementById('sal-base').value='0';document.getElementById('sal-deduct').value='0';
-  calcSal();document.getElementById('mdl-sal').classList.add('show');
-}
-function calcSal() {
-  var handler=document.getElementById('sal-handler').value,month=document.getElementById('sal-month').value;
-  var base=parseFloat(document.getElementById('sal-base').value)||0,deduct=parseFloat(document.getElementById('sal-deduct').value)||0;
-  var rs=A.recs.filter(function(r){return r.type==='income'&&r.handler===handler&&r.date.startsWith(month);});
-  var inc=0,cost=0;
-  for(var i=0;i<rs.length;i++){inc+=total(rs[i]);cost+=parseFloat(rs[i].cost)||0;}
-  var comm=0;for(var j=0;j<rs.length;j++){var rj=rs[j];var t2=(parseFloat(rj.cash)||0)+(parseFloat(rj.qr)||0)+(parseFloat(rj.wx)||0)+(parseFloat(rj.zfb)||0);var p2=Math.max(0,t2-(parseFloat(rj.cost)||0));comm+=p2*(rj.comm||10)/100}var final=base+comm-deduct;
-  document.getElementById('sal-comm').textContent='¥'+comm.toFixed(2)+' (按品类分别计算)';
-  document.getElementById('sal-final').textContent='¥'+final.toFixed(2);
-}
-function saveSal() {
-  var handler=document.getElementById('sal-handler').value,month=document.getElementById('sal-month').value;
-  var base=parseFloat(document.getElementById('sal-base').value)||0,deduct=parseFloat(document.getElementById('sal-deduct').value)||0;
-  if(!handler){showToast('请选择经办人');return;}
-  calcSal();
-  var final=parseFloat(document.getElementById('sal-final').textContent.replace('¥',''))||0;
-  var cm=document.getElementById('sal-comm').textContent.match(/¥([\d.]+)/);
-  var comm=cm?parseFloat(cm[1]):0;
-  A.sals.push({handler:handler,month:month,base:base,comm:comm,deduct:deduct,final:final,id:Date.now()});
-  sv();cls('mdl-sal');refresh();showToast('工资记录已保存 ✓');
-}
+// ====== INIT ======
+(function(){var modals=document.querySelectorAll('.modal-overlay');for(var i=0;i<modals.length;i++){modals[i].addEventListener('click',function(e){if(e.target===this&&this.id!=='modal-detail')this.classList.remove('show')})}})();
 
-// ===== SETTINGS =====
-function openSettings() {
-  var list=document.getElementById('set-list');list.innerHTML='';
-  for(var i=0;i<A.cats.length;i++){
-    var cat=A.cats[i],rate=A.rates[cat]||5;
-    list.innerHTML+='<div class="set-row"><span>'+esc(cat)+'</span><div><input type="number" value="'+rate+'" step="0.1" data-c="'+esc(cat)+'" class="sr"> %</div></div>';
-  }
-  document.getElementById('mdl-set').classList.add('show');
-}
-function saveSet() {
-  var ins=document.querySelectorAll('.sr');
-  for(var i=0;i<ins.length;i++)A.rates[ins[i].dataset.c]=parseFloat(ins[i].value)||0;
-  var np=document.getElementById('set-pwd').value.trim();
-  if(np)A.pwd=np;
-  sv();cls('mdl-set');showToast('设置已保存 ✓');
-}
-
-// ===== UTILS =====
-function cls(id){document.getElementById(id).classList.remove('show');}
-function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function notify(type,store,name,amount) {
-  var msg='【自行车店】'+type+'通知\n店铺：'+store+'\n项目：'+name+'\n金额：¥'+amount.toFixed(2)+'\n时间：'+new Date().toLocaleString();
-  try{fetch('/api/mailer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject:'自行车店记账 - '+type+' - '+name,body:msg.replace(/\n/g,'<br>')})}).catch(function(){})}catch(e){}
-}
-
-// ===== INIT =====
-ld();
-
-// Bind pay input events
-var payIds=['pay0','pay1','pay2','pay3'];
-for(var i=0;i<payIds.length;i++){var el=document.getElementById(payIds[i]);if(el)el.oninput=updSum;}
-
-// Bind salary calc events
-var salEls=['sal-handler','sal-month','sal-base','sal-deduct'];
-for(var i=0;i<salEls.length;i++){var el=document.getElementById(salEls[i]);if(el){el.onchange=calcSal;el.oninput=calcSal;}}
-
-// Close modals on overlay click
-var ols=document.querySelectorAll('.overlay');
-for(var i=0;i<ols.length;i++){ols[i].addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});}
-
-// Init dates
-document.getElementById('rec-date').value=new Date().toISOString().slice(0,10);
-document.getElementById('ex-date').value=new Date().toISOString().slice(0,10);
 </script>
 </body>
 </html>
