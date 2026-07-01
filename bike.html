@@ -403,7 +403,8 @@ function openModal(type, record, idx) {
     if (record) {
         document.getElementById("modal-date").value = record.date || "";
         document.getElementById("modal-store").value = record.store || STORES[0];
-        document.getElementById("modal-handler").value = record.handler || "";
+        document.getElementById("modal-name").value = record.name || "";
+    document.getElementById("modal-handler").value = record.handler || "";
         document.getElementById("modal-note").value = record.note || "";
         if (type === "income") {
             document.getElementById("modal-amount").value = record.amount || "";
@@ -427,7 +428,8 @@ function openModal(type, record, idx) {
         var today = new Date().toISOString().split("T")[0];
         document.getElementById("modal-date").value = today;
         document.getElementById("modal-store").value = STORES[0];
-        document.getElementById("modal-handler").value = "";
+        document.getElementById("modal-name").value = "";
+    document.getElementById("modal-handler").value = "";
         document.getElementById("modal-note").value = "";
         document.getElementById("modal-amount").value = "";
         document.getElementById("modal-cost").value = 0;
@@ -503,6 +505,7 @@ function saveRecord() {
     var record = {};
     record.date = document.getElementById("modal-date").value;
     record.store = document.getElementById("modal-store").value;
+    record.name = document.getElementById("modal-name").value || "";
     record.handler = document.getElementById("modal-handler").value || "";
     record.note = document.getElementById("modal-note").value || "";
     
