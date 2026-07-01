@@ -164,12 +164,19 @@ input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 
 <div id="salary-content"></div>
 </div>
 
+
+<div class="page" id="page-accounts">
+<div class="form-row"><div><label>月份</label><input type="month" id="accounts-month" onchange="renderAccounts()"></div></div>
+<div id="accounts-content"></div>
+</div>
+
 <!-- TAB BAR -->
 <div class="tab-bar">
 <button class="tab-btn active" onclick="switchTab('page-income',this)"><span class="icon">📥</span>收入</button>
 <button class="tab-btn" onclick="switchTab('page-expense',this)"><span class="icon">📤</span>支出</button>
 <button class="tab-btn" onclick="switchTab('page-exchange',this)"><span class="icon">💱</span>换汇</button>
 <button class="tab-btn" onclick="switchTab('page-shareholder',this)"><span class="icon">👥</span>股东</button>
+<button class="tab-btn" onclick="switchTab('page-accounts',this)"><span class="icon">🏦</span>账户</button>
 <button class="tab-btn admin-only" onclick="switchTab('page-salary',this)"><span class="icon">💰</span>工资</button>
 <button class="tab-btn admin-only" onclick="switchTab('page-summary',this)"><span class="icon">📊</span>汇总</button>
 <button class="tab-btn admin-only" onclick="switchTab('page-analysis',this)"><span class="icon">📈</span>分析</button>
@@ -380,7 +387,7 @@ function switchTab(pid,btn){
     var ps=document.querySelectorAll(".page");for(var i=0;i<ps.length;i++)ps[i].classList.remove("active");
     var ts=document.querySelectorAll(".tab-btn");for(var i=0;i<ts.length;i++)ts[i].classList.remove("active");
     var p=document.getElementById(pid);if(p)p.classList.add("active");if(btn)btn.classList.add("active");
-    if(pid==="page-income")renderIncome();else if(pid==="page-expense")renderExpense();else if(pid==="page-exchange")renderExchange();else if(pid==="page-shareholder")renderShareholder();else if(pid==="page-summary")renderSummary();else if(pid==="page-analysis")renderAnalysis();else if(pid==="page-salary")renderSalary();
+    if(pid==="page-income")renderIncome();else if(pid==="page-expense")renderExpense();else if(pid==="page-exchange")renderExchange();else if(pid==="page-shareholder")renderShareholder();else if(pid==="page-summary")renderSummary();else if(pid==="page-analysis")renderAnalysis();else if(pid==="page-salary")renderSalary();else if(pid==="page-accounts")renderAccounts();
 }
 
 // RENDER
@@ -483,7 +490,50 @@ function renderSalary(){
 function updateBase(n,v){var sc=loadSC();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].base=parseFloat(v)||0;saveSC(sc);renderSalary()}
 function updateDed(n,v){var sc=loadSC();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].deduction=parseFloat(v)||0;saveSC(sc);renderSalary()}
 
-function refreshAll(){renderIncome();renderExpense();renderExchange();renderShareholder();if(userRole==="admin"){renderSummary();renderAnalysis();renderSalary()}}
+
+function renderAccounts(){
+    var d=loadD(),me=document.getElementById("accounts-month"),month=me?me.value:"";
+    var inc=d.income,exp=d.expense,exc=d.exchange,sh=d.shareholder;
+    if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month});sh=sh.filter(function(r){return getM(r.date)===month})}
+    var bal={};for(var i=0;i<ACCOUNTS.length;i++)bal[ACCOUNTS[i]]={inflow:0,outflow:0,exIn:0,exOut:0,shIn:0};
+    // Income per account
+    for(var i=0;i<inc.length;i++){var r=inc[i];if(r.account&&bal[r.account])bal[r.account].inflow+=r.amountKZT||0}
+    // Expense per account
+    for(var i=0;i<exp.length;i++){var r=exp[i];if(r.account&&bal[r.account])bal[r.account].outflow+=r.amountKZT||0}
+    // Exchange flows
+    for(var i=0;i<exc.length;i++){
+        var r=exc[i];
+        if(r.exType==="exchange"){
+            if(r.fromAccount&&bal[r.fromAccount])bal[r.fromAccount].exOut+=toKZT(r.fromAmt,r.fromCur);
+            if(r.toAccount&&bal[r.toAccount])bal[r.toAccount].exIn+=toKZT(r.toAmt,r.toCur);
+        }else if(r.exType==="withdraw"){
+            if(r.fromAccount&&bal[r.fromAccount])bal[r.fromAccount].exOut+=toKZT(r.amount,r.currency);
+        }else if(r.exType==="deposit"){
+            if(r.toAccount&&bal[r.toAccount])bal[r.toAccount].exIn+=toKZT(r.amount,r.currency);
+        }
+    }
+    // Shareholder investments
+    for(var i=0;i<sh.length;i++){var r=sh[i];if(!r.account)continue;if(bal[r.account])bal[r.account].shIn+=toKZT(r.amount,r.currency)}
+    var totalNet=0;
+    var h='<div class="card"><h3>🏦 账户与余额 '+(month||"全部")+'</h3>';
+    for(var i=0;i<ACCOUNTS.length;i++){
+        var a=ACCOUNTS[i],b=bal[a],net=b.inflow-b.outflow+b.exIn-b.exOut+b.shIn;
+        totalNet+=net;
+        h+='<div class="total-bar" style="flex-wrap:wrap;padding:12px 14px">';
+        h+='<span class="label" style="font-weight:600;font-size:14px">'+a+'</span>';
+        h+='<span class="value" style="color:'+(net>=0?'var(--green)':'var(--red)')+'">₸'+fmt(net)+'</span>';
+        h+='<div style="width:100%;display:flex;gap:8px;margin-top:6px;font-size:11px;color:var(--sub);flex-wrap:wrap">';
+        h+='<span>📥收入 +₸'+fmt(b.inflow)+'</span><span>📤支出 -₸'+fmt(b.outflow)+'</span>';
+        if(b.exIn>0||b.exOut>0)h+='<span>💱换汇 +₸'+fmt(b.exIn)+' -₸'+fmt(b.exOut)+'</span>';
+        if(b.shIn>0)h+='<span>👥出资 +₸'+fmt(b.shIn)+'</span>';
+        h+='</div></div>';
+    }
+    h+='<div class="total-bar" style="background:var(--primary);color:#fff"><span class="label" style="color:#fff">总计</span><span class="value">₸'+fmt(totalNet)+'</span></div>';
+    h+='</div>';
+    document.getElementById("accounts-content").innerHTML=h;
+}
+
+function refreshAll(){renderIncome();renderExpense();renderExchange();renderShareholder();renderAccounts();if(userRole==="admin"){renderSummary();renderAnalysis();renderSalary()}}
 
 // INIT
 if(userRole){document.getElementById("login-screen").style.display="none";applyPerms()}
