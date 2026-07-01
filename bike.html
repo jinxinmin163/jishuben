@@ -363,8 +363,7 @@ function openModal(type, record, idx) {
     else title.textContent = "记换钱";
     
     document.getElementById("modal-delete").style.display = (currentEditIdx >= 0) ? "" : "none";
-    document.getElementById("modal-cost-row").classList.toggle("hidden", type !== "income");
-    document.getElementById("modal-comm-row").classList.toggle("hidden", type !== "income");
+    document.getElementById("modal-cost-row").classList.toggle("hidden", type !== "income" || userRole !== "admin");document.getElementById("modal-comm-row").classList.toggle("hidden", type !== "income" || userRole !== "admin");document.getElementById("profit-preview").classList.toggle("hidden", userRole !== "admin");
     document.getElementById("modal-exchange-row").classList.toggle("hidden", type !== "exchange");
     document.getElementById("modal-pay-row").classList.toggle("hidden", type === "exchange");
     
@@ -683,7 +682,7 @@ function renderIncome() {
     if (userRole!=="admin") list = list.filter(function(r){return isWithin2Days(r.date)});
     var total=0,profit=0;
     for (var i=0;i<list.length;i++){total+=list[i].amount;profit+=list[i].amount-(list[i].cost||0);}
-    document.getElementById("income-total").textContent="共 "+list.length+" 笔，合计 ¥"+fmt(total)+"，利润 ¥"+fmt(profit);
+    document.getElementById("income-total").textContent="共 "+list.length+" 笔，合计 ¥"+fmt(total)+(userRole==="admin"?"，利润 ¥"+fmt(profit):"");
     var h="";
     if (list.length===0) h='<div class="empty-state"><div class="icon">📥</div>暂无收入记录</div>';
     else for (var i=0;i<list.length;i++){
@@ -691,7 +690,7 @@ function renderIncome() {
         h+='<div class="record-item" onclick="editRecord(\'income\','+idx+')">';
         h+='<div class="record-info"><div class="cat">'+r.cat+'</div><div class="meta">'+fmtDate(r.date)+' | '+r.store+' | '+(r.handler||"-")+'</div>';
         if (r.note) h+='<div class="meta" style="color:var(--orange)">'+r.note+'</div>';
-        h+='</div><div class="record-amount income">¥'+fmt(r.amount)+'<span class="sub">利润 ¥'+fmt(pf)+' | 提成'+(r.commRate||0)+'%</span></div></div>';
+        h+='</div><div class="record-amount income">¥'+fmt(r.amount)+(userRole==="admin"?'<span class="sub">利润 ¥'+fmt(pf)+' | 提成'+(r.commRate||0)+'%</span>':'')+'</div></div>';
     }
     document.getElementById("income-list").innerHTML=h;
 }
