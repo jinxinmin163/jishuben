@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🍦 蜜雪合伙店记账本</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#10b981;--green-light:#d1fae5;--red:#ef4444;--red-light:#fee2e2;--bg:#f5f5f5;--card:#fff;--text:#1f2937;--sub:#6b7280;--border:#e5e7eb;--primary:#f59e0b;--orange:#f59e0b;--orange-light:#fef3c7}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:80px}
+header{background:var(--primary);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px}
+.header-btns{display:flex;gap:4px}
+.header-btns button{background:rgba(255,255,255,.2);border:0;color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.login-screen h2{font-size:24px;margin-bottom:24px}
+.login-card{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.tab-row{display:flex;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:16px}
+.tab-row button{flex:1;padding:9px;border:0;background:none;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit}
+.tab-row button.active{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.1);font-weight:600}
+.hidden{display:none!important}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;text-align:center}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);display:flex;border-top:1px solid var(--border);z-index:10;padding-bottom:env(safe-area-inset-bottom);overflow-x:auto}
+.tab-btn{flex:1 0 auto;min-width:0;border:0;background:none;padding:7px 2px 5px;font-size:10px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.tab-btn.active{color:var(--primary)}
+.tab-btn .icon{font-size:18px}
+.page{display:none;padding:10px 14px}
+.page.active{display:block}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h3{font-size:15px;margin-bottom:10px}
+.form-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.form-row>*{flex:1;min-width:0}
+label{display:block;font-size:12px;color:var(--sub);margin-bottom:2px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);-webkit-appearance:none}
+input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:10px 16px;border:0;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-block{width:100%}
+.btn-ghost{background:none;color:var(--red);padding:5px}
+.record-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:6px;cursor:pointer}
+.record-item:last-child{border-bottom:0}
+.record-info{flex:1;min-width:0}
+.record-info .cat{font-size:13px;font-weight:600}
+.record-info .meta{font-size:11px;color:var(--sub);margin-top:2px}
+.record-amount{font-size:16px;font-weight:700;text-align:right;white-space:nowrap}
+.record-amount.income{color:var(--green)}
+.record-amount.expense{color:var(--red)}
+.record-amount.exchange{color:var(--orange)}
+.record-amount.shareholder{color:var(--primary)}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.summary-item{background:var(--bg);border-radius:10px;padding:12px;text-align:center}
+.summary-item .label{font-size:12px;color:var(--sub)}
+.summary-item .value{font-size:20px;font-weight:700;margin-top:3px}
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
+.filter-tag{padding:5px 12px;border:1px solid var(--border);border-radius:14px;font-size:12px;background:var(--card);cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
+.filter-tag.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:18px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal h3{margin-bottom:12px;font-size:16px}
+.chart-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.chart-row .lbl{width:85px;font-size:12px;text-align:right;flex-shrink:0}
+.chart-row .bar-wrap{flex:1;height:20px;background:var(--bg);border-radius:4px;overflow:hidden}
+.chart-row .bar{height:100%;border-radius:4px}
+.chart-row .bar.green{background:var(--green)}
+.chart-row .bar.red{background:var(--red)}
+.chart-row .bar.orange{background:var(--orange)}
+.chart-row .amt{width:100px;font-size:12px;font-weight:600;text-align:right;flex-shrink:0}
+.empty-state{text-align:center;padding:36px 16px;color:var(--sub)}
+.empty-state .icon{font-size:42px;margin-bottom:8px}
+.total-bar{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.total-bar .label{font-size:13px;color:var(--sub)}
+.total-bar .value{font-size:17px;font-weight:700}
+.section-title{font-size:14px;font-weight:600;margin:12px 0 8px;color:var(--text)}
+.salary-row{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;flex-wrap:wrap}
+.salary-row .sname{flex:1;font-weight:600;min-width:80px}
+.salary-row .sval{text-align:right;min-width:50px}
+.settings-row{display:flex;align-items:center;gap:8px;padding:6px 0}
+.settings-row .cat-name{flex:1;font-size:14px}
+.settings-row input[type=number]{width:60px;text-align:center}</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<h2>🍦 蜜雪合伙店</h2>
+<div class="login-card">
+<div class="tab-row">
+<button class="active" onclick="switchLoginTab('admin')">🔐 管理员</button>
+<button onclick="switchLoginTab('staff')">📝 员工记账</button>
+</div>
+<div id="login-admin-panel">
+<label>管理员密码</label><input type="password" id="admin-pwd" placeholder="请输入密码" style="margin-bottom:10px">
+<button class="btn btn-primary btn-block" onclick="loginAsAdmin()">登录</button>
+</div>
+<div id="login-staff-panel" class="hidden">
+<p style="font-size:13px;color:var(--sub);margin-bottom:12px;text-align:center">员工无需密码，只能查看2天内记录</p>
+<button class="btn btn-green btn-block" onclick="loginAsStaff()">进入记账</button>
+</div>
+<div class="login-error" id="login-error"></div>
+</div>
+</div>
+
+<!-- HEADER -->
+<header>
+<a href="index.html" style="color:#fff;text-decoration:none;font-size:20px;margin-right:8px">🏠</a>
+<h1>🍦 蜜雪合伙店记账本</h1>
+<div class="header-btns">
+<button onclick="openSettings()" id="settings-btn" style="display:none">⚙️</button>
+<button onclick="logout()" id="logout-btn">🚪</button>
+</div>
+</header>
+
+<!-- PAGES -->
+<div class="page active" id="page-income">
+<div class="card" style="background:var(--primary);color:#fff;text-align:center;padding:12px">
+<button class="btn btn-green btn-block" onclick="openModal('income')" style="margin-bottom:6px">+ 记收入</button>
+<button class="btn btn-red btn-block" onclick="openModal('expense')">+ 记支出</button>
+<button class="btn btn-orange btn-block" onclick="openModal('exchange')" style="margin-top:6px">+ 记换汇</button>
+<button class="btn btn-primary btn-block" onclick="openModal('shareholder')" style="margin-top:6px;background:var(--primary)">+ 股东出资</button>
+</div>
+<div class="filter-bar" id="inc-cat-filter"></div>
+<div class="form-row"><div><label>月份</label><input type="month" id="income-month" onchange="renderIncome()"></div></div>
+<div class="total-bar"><span class="label" id="income-total">共 0 笔</span></div>
+<div id="income-list"></div>
+</div>
+
+<div class="page" id="page-expense">
+<div class="filter-bar" id="exp-cat-filter"></div>
+<div class="form-row"><div><label>月份</label><input type="month" id="expense-month" onchange="renderExpense()"></div></div>
+<div class="total-bar"><span class="label" id="expense-total">共 0 笔</span></div>
+<div id="expense-list"></div>
+</div>
+
+<div class="page" id="page-exchange">
+<div class="form-row"><div><label>月份</label><input type="month" id="exchange-month" onchange="renderExchange()"></div></div>
+<div id="exchange-list"></div>
+</div>
+
+<div class="page" id="page-shareholder">
+<div class="total-bar"><span class="label" id="shareholder-total">共 0 笔</span></div>
+<div id="shareholder-list"></div>
+</div>
+
+<div class="page admin-page" id="page-summary">
+<div class="form-row">
+<div><label>月份</label><input type="month" id="summary-month" onchange="renderSummary()"></div>
+<div><label>经办人</label><select id="summary-store" onchange="renderSummary()"><option value="全部">全部</option></select></div>
+</div>
+<div id="summary-content"></div>
+</div>
+
+<div class="page admin-page" id="page-analysis">
+<div class="form-row">
+<div><label>月份</label><input type="month" id="analysis-month" onchange="renderAnalysis()"></div>
+<div><label>经办人</label><select id="analysis-store" onchange="renderAnalysis()"><option value="全部">全部</option></select></div>
+</div>
+<div id="analysis-content"></div>
+</div>
+
+<div class="page admin-page" id="page-salary">
+<div id="salary-content"></div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+<button class="tab-btn active" onclick="switchTab('page-income',this)"><span class="icon">📥</span>收入</button>
+<button class="tab-btn" onclick="switchTab('page-expense',this)"><span class="icon">📤</span>支出</button>
+<button class="tab-btn" onclick="switchTab('page-exchange',this)"><span class="icon">💱</span>换汇</button>
+<button class="tab-btn" onclick="switchTab('page-shareholder',this)"><span class="icon">👥</span>股东</button>
+<button class="tab-btn admin-only" onclick="switchTab('page-salary',this)"><span class="icon">💰</span>工资</button>
+<button class="tab-btn admin-only" onclick="switchTab('page-summary',this)"><span class="icon">📊</span>汇总</button>
+<button class="tab-btn admin-only" onclick="switchTab('page-analysis',this)"><span class="icon">📈</span>分析</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+<div class="modal">
+<h3 id="modal-title">记收入</h3>
+<div class="form-row"><div><label>日期</label><input type="date" id="modal-date"></div><div><label>经办人</label><input type="text" id="modal-handler" list="handler-list" placeholder="选择"><datalist id="handler-list"></datalist></div></div>
+<div id="modal-cat-row"><div class="form-row"><div><label>类别</label><select id="modal-cat"></select></div></div></div>
+<div id="modal-income-fields">
+<div class="form-row"><div><label>金额</label><input type="number" id="modal-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-currency"></select></div></div>
+<div class="form-row"><div><label>账户</label><select id="modal-account"></select></div><div><label>订单数</label><input type="number" id="modal-orders" placeholder="0"></div></div>
+<div class="form-row"><div><label>杯数</label><input type="number" id="modal-cups" placeholder="0"></div></div>
+</div>
+<div id="modal-expense-fields">
+<div class="form-row"><div><label>金额</label><input type="number" id="modal-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-currency"></select></div></div>
+<div class="form-row"><div><label>账户</label><select id="modal-account"></select></div></div>
+</div>
+<div id="modal-exchange-fields">
+<div class="form-row"><div><label>换出币种</label><select id="modal-ex-from-cur"></select></div><div><label>换出金额</label><input type="number" id="modal-ex-from-amt" step="0.01" placeholder="0.00"></div></div>
+<div class="form-row"><div><label>换入币种</label><select id="modal-ex-to-cur"></select></div><div><label>换入金额</label><input type="number" id="modal-ex-to-amt" step="0.01" placeholder="0.00"></div></div>
+<div class="form-row"><div><label>账户</label><select id="modal-ex-account"></select></div></div>
+</div>
+<div id="modal-shareholder-fields">
+<div class="form-row"><div><label>股东姓名</label><input type="text" id="modal-sh-name" placeholder="姓名"></div><div><label>占股 %</label><input type="number" id="modal-sh-share" step="1" placeholder="0"></div></div>
+<div class="form-row"><div><label>出资金额</label><input type="number" id="modal-sh-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-sh-currency"></select></div></div>
+</div>
+<div class="form-row"><div><label>备注</label><input type="text" id="modal-note" placeholder="可选备注"></div></div>
+<div style="display:flex;gap:6px;margin-top:14px">
+<button class="btn btn-ghost" id="modal-delete" style="display:none" onclick="deleteRecord()">🗑 删除</button>
+<button class="btn btn-primary btn-block" onclick="saveRecord()">💾 保存</button>
+</div>
+<button class="btn btn-ghost btn-block" onclick="closeModal()" style="margin-top:6px">取消</button>
+</div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+<div class="modal">
+<h3>⚙️ 设置</h3>
+<div id="settings-list"></div>
+</div>
+</div>
+<script>// ====== 蜜雪合伙店记账本 ======
+var userRole = sessionStorage.getItem("mx_role") || "";
+var ADMIN_PWD = "admin888";
+var INC_CATS = ["门店销售","外卖平台","团购/预订","退款冲回","其他收入"];
+var EXP_CATS = ["房租","人工工资","原料/包材","水电网","税费","装修","设备","维修","物流/运输","营销推广","平台手续费","办公杂费","股东借款归还","其他支出"];
+var ACCOUNTS = ["现金KZT","Kaspi店铺","银行KZT","Wolt/Glovo待结算","现金RMB","微信/支付宝RMB","USD现金"];
+var CURRENCIES = ["KZT","CNY","USD","RMB"];
+var HANDLERS = ["经鑫铭","店长","收银员","会计","其他"];
+var COMM_RATE = 5; // 5% fixed commission
+var RATES = {KZT_CNY: 0.016, CNY_KZT: 63, USD_KZT: 460, USD_CNY: 7.2, CNY_USD: 0.14};
+var currentType = "income";
+var currentEditIdx = -1;
+var activeCatFilter = "全部";
+
+function fmt(n){return Number(n||0).toFixed(2)}
+function fmtD(d){var p=String(d).split("-");return p[1]+"月"+p[2]+"日"}
+function getM(d){return String(d).substring(0,7)}
+function is2Day(ds){if(userRole==="admin")return true;try{var d=new Date(ds+"T00:00:00"),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate()-2);return d>=t}catch(e){return true}}
+function toKZT(amount,currency){if(currency==="KZT"||!currency)return amount;if(currency==="CNY"||currency==="RMB")return amount*RATES.CNY_KZT;if(currency==="USD")return amount*RATES.USD_KZT;return amount}
+function fmtCur(amount,currency){var c=currency||"KZT";if(c==="KZT")return"₸"+fmt(amount);if(c==="CNY"||c==="RMB")return"¥"+fmt(amount);if(c==="USD")return"$"+fmt(amount);return fmt(amount)}
+
+function loadD(){try{return JSON.parse(localStorage.getItem("mx_ledger")||'{"income":[],"expense":[],"exchange":[],"shareholder":[]}')}catch(e){return{income:[],expense:[],exchange:[],shareholder:[]}}}
+function saveD(d){localStorage.setItem("mx_ledger",JSON.stringify(d))}
+function loadSC(){try{return JSON.parse(localStorage.getItem("mx_salaries")||"{}")}catch(e){return{}}}
+function saveSC(c){localStorage.setItem("mx_salaries",JSON.stringify(c))}
+
+// LOGIN
+function switchLoginTab(t){
+    var bs=document.querySelectorAll("#login-screen .tab-row button");
+    for(var i=0;i<bs.length;i++)bs[i].classList.remove("active");
+    if(t==="admin")bs[0].classList.add("active");else bs[1].classList.add("active");
+    document.getElementById("login-admin-panel").classList.toggle("hidden",t!=="admin");
+    document.getElementById("login-staff-panel").classList.toggle("hidden",t!=="staff");
+    document.getElementById("login-error").textContent="";
+}
+function loginAsAdmin(){
+    if(document.getElementById("admin-pwd").value===ADMIN_PWD){
+        userRole="admin";sessionStorage.setItem("mx_role","admin");
+        document.getElementById("login-screen").style.display="none";applyPerms();refreshAll();
+    }else{document.getElementById("login-error").textContent="密码错误"}
+}
+function loginAsStaff(){
+    userRole="staff";sessionStorage.setItem("mx_role","staff");
+    document.getElementById("login-screen").style.display="none";applyPerms();refreshAll();
+}
+function logout(){sessionStorage.removeItem("mx_role");location.reload()}
+function applyPerms(){
+    var isA=userRole==="admin";
+    var els=document.querySelectorAll(".admin-only");for(var i=0;i<els.length;i++)els[i].style.display=isA?"":"none";
+    var ps=document.querySelectorAll(".admin-page");for(var i=0;i<ps.length;i++){if(!isA){ps[i].classList.remove("active");ps[i].style.display="none"}}
+    var sb=document.getElementById("settings-btn"),lb=document.getElementById("logout-btn");
+    if(sb)sb.style.display=isA?"":"none";if(lb)lb.style.display=isA?"":"none";
+    if(!isA){var t=document.querySelector(".tab-btn");if(t)switchTab("page-income",t)}
+}
+
+// SETUP
+(function(){
+    var ids=["income-store","expense-store","summary-store","analysis-store"];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(!el)continue;for(var j=0;j<HANDLERS.length;j++){var o=document.createElement("option");o.value=HANDLERS[j];o.textContent=HANDLERS[j];el.appendChild(o)}}
+    var incF=document.getElementById("inc-cat-filter"),expF=document.getElementById("exp-cat-filter");
+    if(incF){incF.innerHTML='<button class="filter-tag active" onclick="activeCatFilter=\'全部\';renderIncome();refreshFT()">全部</button>';for(var i=0;i<INC_CATS.length;i++)incF.innerHTML+='<button class="filter-tag" onclick="activeCatFilter=\''+INC_CATS[i].replace(/'/g,"\\'")+'\';renderIncome();refreshFT()">'+INC_CATS[i]+'</button>'}
+    if(expF){expF.innerHTML='<button class="filter-tag active" onclick="activeCatFilter=\'全部\';renderExpense();refreshFT()">全部</button>';for(var i=0;i<EXP_CATS.length;i++)expF.innerHTML+='<button class="filter-tag" onclick="activeCatFilter=\''+EXP_CATS[i].replace(/'/g,"\\'")+'\';renderExpense();refreshFT()">'+EXP_CATS[i]+'</button>'}
+})();
+function refreshFT(){var ts=document.querySelectorAll(".filter-tag");for(var i=0;i<ts.length;i++)ts[i].classList.toggle("active",ts[i].textContent===activeCatFilter)}
+
+// MODAL
+function openModal(type,record,idx){
+    currentType=type;currentEditIdx=(idx!==undefined&&idx>=0)?idx:-1;
+    var t=document.getElementById("modal-title");
+    if(type==="income")t.textContent="记收入";else if(type==="expense")t.textContent="记支出";else if(type==="exchange")t.textContent="记换汇";else t.textContent="记股东出资";
+    document.getElementById("modal-delete").style.display=(currentEditIdx>=0)?"":"none";
+    document.getElementById("modal-income-fields").classList.toggle("hidden",type!=="income");
+    document.getElementById("modal-expense-fields").classList.toggle("hidden",type!=="expense");
+    document.getElementById("modal-exchange-fields").classList.toggle("hidden",type!=="exchange");
+    document.getElementById("modal-shareholder-fields").classList.toggle("hidden",type!=="shareholder");
+    
+    var catDiv=document.getElementById("modal-cat-row");
+    if(type==="exchange"||type==="shareholder")catDiv.classList.add("hidden");else catDiv.classList.remove("hidden");
+    
+    if(type==="income"){
+        var cs=document.getElementById("modal-cat");cs.innerHTML="";for(var i=0;i<INC_CATS.length;i++)cs.innerHTML+='<option value="'+INC_CATS[i]+'">'+INC_CATS[i]+'</option>';
+    }else if(type==="expense"){
+        var cs=document.getElementById("modal-cat");cs.innerHTML="";for(var i=0;i<EXP_CATS.length;i++)cs.innerHTML+='<option value="'+EXP_CATS[i]+'">'+EXP_CATS[i]+'</option>';
+    }
+    
+    var ce=document.getElementById("modal-currency");ce.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)ce.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
+    var ae=document.getElementById("modal-account");ae.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)ae.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
+    
+    if(record){
+        document.getElementById("modal-date").value=record.date||"";
+        document.getElementById("modal-handler").value=record.handler||"";
+        document.getElementById("modal-note").value=record.note||"";
+        if(type==="income"){document.getElementById("modal-amount").value=record.amount||"";document.getElementById("modal-currency").value=record.currency||"KZT";document.getElementById("modal-account").value=record.account||ACCOUNTS[0];document.getElementById("modal-orders").value=record.orders||"";document.getElementById("modal-cups").value=record.cups||"";document.getElementById("modal-cat").value=record.cat||INC_CATS[0]}
+        else if(type==="expense"){document.getElementById("modal-amount").value=record.amount||"";document.getElementById("modal-currency").value=record.currency||"KZT";document.getElementById("modal-account").value=record.account||ACCOUNTS[0];document.getElementById("modal-cat").value=record.cat||EXP_CATS[0]}
+        else if(type==="exchange"){document.getElementById("modal-ex-from-cur").value=record.fromCur||"KZT";document.getElementById("modal-ex-from-amt").value=record.fromAmt||"";document.getElementById("modal-ex-to-cur").value=record.toCur||"KZT";document.getElementById("modal-ex-to-amt").value=record.toAmt||"";document.getElementById("modal-ex-account").value=record.account||ACCOUNTS[0]}
+        else if(type==="shareholder"){document.getElementById("modal-sh-name").value=record.name||"";document.getElementById("modal-sh-amount").value=record.amount||"";document.getElementById("modal-sh-currency").value=record.currency||"CNY";document.getElementById("modal-sh-share").value=record.share||""}
+    }else{
+        var today=new Date().toISOString().split("T")[0];
+        document.getElementById("modal-date").value=today;document.getElementById("modal-handler").value="";document.getElementById("modal-note").value="";
+        document.getElementById("modal-amount").value="";document.getElementById("modal-currency").value="KZT";document.getElementById("modal-account").value=ACCOUNTS[0];
+        document.getElementById("modal-orders").value="";document.getElementById("modal-cups").value="";
+        document.getElementById("modal-ex-from-cur").value="KZT";document.getElementById("modal-ex-from-amt").value="";document.getElementById("modal-ex-to-cur").value="CNY";document.getElementById("modal-ex-to-amt").value="";document.getElementById("modal-ex-account").value=ACCOUNTS[0];
+        document.getElementById("modal-sh-name").value="";document.getElementById("modal-sh-amount").value="";document.getElementById("modal-sh-currency").value="CNY";document.getElementById("modal-sh-share").value="";
+        if(type==="income")document.getElementById("modal-cat").value=INC_CATS[0];
+        if(type==="expense")document.getElementById("modal-cat").value=EXP_CATS[0];
+    }
+    document.getElementById("modal").classList.add("show");populateHandlerList();
+}
+function populateHandlerList(){var dl=document.getElementById("handler-list");if(!dl)return;var d=loadD();var s={};for(var i=0;i<d.income.length;i++){if(d.income[i].handler)s[d.income[i].handler]=true}for(var i=0;i<d.expense.length;i++){if(d.expense[i].handler)s[d.expense[i].handler]=true}for(var i=0;i<HANDLERS.length;i++)s[HANDLERS[i]]=true;dl.innerHTML="";for(var k in s)dl.innerHTML+='<option value="'+k+'">'}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+
+function saveRecord(){
+    var d=loadD();var r={};r.date=document.getElementById("modal-date").value;r.handler=document.getElementById("modal-handler").value||"";r.note=document.getElementById("modal-note").value||"";
+    if(currentType==="income"){
+        r.cat=document.getElementById("modal-cat").value;r.amount=parseFloat(document.getElementById("modal-amount").value)||0;r.currency=document.getElementById("modal-currency").value;r.account=document.getElementById("modal-account").value;r.orders=parseInt(document.getElementById("modal-orders").value)||0;r.cups=parseInt(document.getElementById("modal-cups").value)||0;r.amountKZT=toKZT(r.amount,r.currency);
+        if(r.amount<=0){alert("请输入收入金额");return}
+    }else if(currentType==="expense"){
+        r.cat=document.getElementById("modal-cat").value;r.amount=parseFloat(document.getElementById("modal-amount").value)||0;r.currency=document.getElementById("modal-currency").value;r.account=document.getElementById("modal-account").value;r.amountKZT=toKZT(r.amount,r.currency);
+        if(r.amount<=0){alert("请输入支出金额");return}
+    }else if(currentType==="exchange"){
+        r.fromCur=document.getElementById("modal-ex-from-cur").value;r.fromAmt=parseFloat(document.getElementById("modal-ex-from-amt").value)||0;r.toCur=document.getElementById("modal-ex-to-cur").value;r.toAmt=parseFloat(document.getElementById("modal-ex-to-amt").value)||0;r.account=document.getElementById("modal-ex-account").value;
+        if(r.fromAmt<=0||r.toAmt<=0){alert("请输入换汇金额");return}if(r.fromCur===r.toCur){alert("币种不能相同");return}
+    }else if(currentType==="shareholder"){
+        r.name=document.getElementById("modal-sh-name").value;r.amount=parseFloat(document.getElementById("modal-sh-amount").value)||0;r.currency=document.getElementById("modal-sh-currency").value;r.share=parseFloat(document.getElementById("modal-sh-share").value)||0;
+        if(!r.name){alert("请输入股东姓名");return}if(r.amount<=0){alert("请输入出资金额");return}
+    }
+    if(!r.date){alert("请选择日期");return}
+    var arr=d[currentType];
+    if(currentEditIdx>=0&&currentEditIdx<arr.length)arr[currentEditIdx]=r;else arr.push(r);
+    saveD(d);closeModal();sendNotify(currentType,r);refreshAll();
+}
+function deleteRecord(){if(currentEditIdx<0)return;if(!confirm("确定删除？"))return;var d=loadD();var arr=d[currentType];if(currentEditIdx<arr.length)arr.splice(currentEditIdx,1);saveD(d);closeModal();refreshAll()}
+function editRecord(type,idx){var d=loadD();var arr=d[type];if(idx>=0&&idx<arr.length)openModal(type,arr[idx],idx)}
+
+// NOTIFY
+function sendNotify(type,record){
+    var ps=loadPushS();if(ps.enabled&&ps.webhookUrl){var tn={income:"收入",expense:"支出",exchange:"换汇",shareholder:"股东出资"};var a=type==="income"?fmtCur(record.amount,record.currency):type==="expense"?fmtCur(record.amount,record.currency):type==="exchange"?fmtCur(record.fromAmt,record.fromCur)+"→"+fmtCur(record.toAmt,record.toCur):fmtCur(record.amount,record.currency);var txt="## 蜜雪 - "+tn[type]+"\n日期: "+record.date+"\n金额: "+a+"\n经办: "+(record.handler||"-");try{fetch(ps.webhookUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({msgtype:"markdown",markdown:{content:txt}})})}catch(e){}}
+    var es=loadEmailS();if(es.enabled&&es.smtp_host&&es.to_addr){var tn={income:"收入",expense:"支出",exchange:"换汇",shareholder:"股东出资"};var a=type==="income"?fmtCur(record.amount,record.currency):type==="expense"?fmtCur(record.amount,record.currency):type==="exchange"?fmtCur(record.fromAmt,record.fromCur)+"→"+fmtCur(record.toAmt,record.toCur):fmtCur(record.amount,record.currency);var body="【蜜雪 - "+tn[type]+"】\n日期: "+record.date+"\n金额: "+a+"\n经办: "+(record.handler||"-");try{fetch("/api/mailer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({smtp_host:es.smtp_host,smtp_port:es.smtp_port,smtp_user:es.smtp_user,smtp_pass:es.smtp_pass,to_addr:es.to_addr,subject:"蜜雪记账 - "+tn[type],body:body})})}catch(e){}}
+}
+function loadPushS(){try{var s=JSON.parse(localStorage.getItem("mx_push_settings")||"{}");return{enabled:!!s.enabled,webhookUrl:s.webhookUrl||""}}catch(e){return{enabled:false,webhookUrl:""}}}
+function loadEmailS(){try{var s=JSON.parse(localStorage.getItem("mx_email_settings")||"{}");return{enabled:!!s.enabled,smtp_host:s.smtp_host||"",smtp_port:s.smtp_port||465,smtp_user:s.smtp_user||"",smtp_pass:s.smtp_pass||"",to_addr:s.to_addr||""}}catch(e){return{enabled:false,smtp_host:"",smtp_port:465,smtp_user:"",smtp_pass:"",to_addr:""}}}
+
+// SETTINGS
+function openSettings(){if(userRole!=="admin")return;var ps=loadPushS(),es=loadEmailS();var h='<b>📱 微信推送</b><div style="margin-top:6px"><label>Webhook地址</label><input type="text" id="webhook-url" value="'+ps.webhookUrl+'"></div><div style="margin-top:6px"><label><input type="checkbox" id="webhook-enabled"'+(ps.enabled?" checked":"")+' style="width:auto"> 启用</label></div>';h+='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><b>📧 邮箱通知</b><div style="font-size:11px;color:var(--orange);margin:4px 0">QQ邮箱需授权码</div><div class="form-row"><div><label>SMTP</label><input type="text" id="email-smtp-host" value="'+es.smtp_host+'"></div><div><label>端口</label><input type="number" id="email-smtp-port" value="'+es.smtp_port+'"></div></div><div class="form-row"><div><label>发件邮箱</label><input type="text" id="email-user" value="'+es.smtp_user+'"></div><div><label>授权码</label><input type="password" id="email-pass" value="'+es.smtp_pass+'"></div></div><div style="margin-top:6px"><label>收件邮箱（逗号分隔）</label><input type="text" id="email-to" value="'+es.to_addr+'"></div><div style="margin-top:6px"><label><input type="checkbox" id="email-enabled"'+(es.enabled?" checked":"")+' style="width:auto"> 启用</label></div></div>';h+='<div style="margin-top:6px"><label>默认提成比例 %</label><input type="number" id="comm-rate" value="'+COMM_RATE+'" step="1" min="0" max="100"><label style="margin-top:6px">汇率 KZT/CNY</label><input type="number" id="rate-kzt-cny" value="'+RATES.CNY_KZT+'" step="0.01"></div>';h+='<div style="margin-top:14px"><button class="btn btn-primary btn-block" onclick="saveSettings()">💾 保存</button></div>';h+='<button class="btn btn-orange btn-block" onclick="importHistory()" style="margin-top:8px">📥 导入历史数据</button><div id="import-status" style="font-size:12px;margin-top:4px;text-align:center"></div>';h+='<button class="btn btn-ghost btn-block" onclick="document.getElementById(\'settings-modal\').classList.remove(\'show\')" style="margin-top:6px">取消</button>';document.getElementById("settings-list").innerHTML=h;document.getElementById("settings-modal").classList.add("show")}
+function saveSettings(){COMM_RATE=parseFloat(document.getElementById("comm-rate").value)||5;RATES.CNY_KZT=parseFloat(document.getElementById("rate-kzt-cny").value)||63;RATES.KZT_CNY=1/RATES.CNY_KZT;var ps={enabled:document.getElementById("webhook-enabled").checked,webhookUrl:document.getElementById("webhook-url").value};localStorage.setItem("mx_push_settings",JSON.stringify(ps));var es={enabled:document.getElementById("email-enabled").checked,smtp_host:document.getElementById("email-smtp-host").value,smtp_port:parseInt(document.getElementById("email-smtp-port").value)||465,smtp_user:document.getElementById("email-user").value,smtp_pass:document.getElementById("email-pass").value,to_addr:document.getElementById("email-to").value};localStorage.setItem("mx_email_settings",JSON.stringify(es));document.getElementById("settings-modal").classList.remove("show");alert("设置已保存")}
+function importHistory(){var st=document.getElementById("import-status");st.textContent="⏳ 获取中...";fetch("/mixue_import.json").then(function(r){return r.json()}).then(function(d){var data=loadD();var a=0;if(d.income)for(var i=0;i<d.income.length;i++){data.income.push(d.income[i]);a++}if(d.expense)for(var i=0;i<d.expense.length;i++){data.expense.push(d.expense[i]);a++}if(d.exchange)for(var i=0;i<d.exchange.length;i++){data.exchange.push(d.exchange[i]);a++}if(d.shareholder)for(var i=0;i<d.shareholder.length;i++){data.shareholder.push(d.shareholder[i]);a++}saveD(data);st.textContent="✅ 已导入 "+a+" 条";setTimeout(function(){location.reload()},1500)}).catch(function(e){st.textContent="❌ "+e.message})}
+
+// TABS
+function switchTab(pid,btn){
+    var ps=document.querySelectorAll(".page");for(var i=0;i<ps.length;i++)ps[i].classList.remove("active");
+    var ts=document.querySelectorAll(".tab-btn");for(var i=0;i<ts.length;i++)ts[i].classList.remove("active");
+    var p=document.getElementById(pid);if(p)p.classList.add("active");if(btn)btn.classList.add("active");
+    if(pid==="page-income")renderIncome();else if(pid==="page-expense")renderExpense();else if(pid==="page-exchange")renderExchange();else if(pid==="page-shareholder")renderShareholder();else if(pid==="page-summary")renderSummary();else if(pid==="page-analysis")renderAnalysis();else if(pid==="page-salary")renderSalary();
+}
+
+// RENDER
+function renderIncome(){
+    var d=loadD(),m=document.getElementById("income-month"),month=m?m.value:"";
+    var list=d.income.slice().reverse();if(month)list=list.filter(function(r){return getM(r.date)===month});if(activeCatFilter!=="全部")list=list.filter(function(r){return r.cat===activeCatFilter});if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
+    var total=0,oTotal=0,cTotal=0;for(var i=0;i<list.length;i++){total+=list[i].amountKZT||0;oTotal+=list[i].orders||0;cTotal+=list[i].cups||0}
+    document.getElementById("income-total").textContent=list.length+"笔 | 收入₸"+fmt(total)+" | "+oTotal+"单 | "+cTotal+"杯";
+    var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">📥</div>暂无收入</div>';
+    else for(var i=0;i<list.length;i++){var r=list[i];h+='<div class="record-item" onclick="editRecord(\'income\','+d.income.indexOf(r)+')"><div class="record-info"><div class="cat">'+r.cat+'</div><div class="meta">'+fmtD(r.date)+' | '+(r.handler||"-")+' | '+(r.account||"-")+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount income">'+fmtCur(r.amount,r.currency)+'<span class="sub">'+fmtCur(r.amountKZT,"KZT")+' | '+(r.orders||0)+'单'+(r.cups||0)+'杯</span></div></div>'}
+    document.getElementById("income-list").innerHTML=h;
+}
+function renderExpense(){
+    var d=loadD(),m=document.getElementById("expense-month"),month=m?m.value:"";
+    var list=d.expense.slice().reverse();if(month)list=list.filter(function(r){return getM(r.date)===month});if(activeCatFilter!=="全部")list=list.filter(function(r){return r.cat===activeCatFilter});if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
+    var total=0;for(var i=0;i<list.length;i++)total+=list[i].amountKZT||0;document.getElementById("expense-total").textContent=list.length+"笔 | 合计₸"+fmt(total);
+    var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">📤</div>暂无支出</div>';
+    else for(var i=0;i<list.length;i++){var r=list[i];h+='<div class="record-item" onclick="editRecord(\'expense\','+d.expense.indexOf(r)+')"><div class="record-info"><div class="cat">'+r.cat+'</div><div class="meta">'+fmtD(r.date)+' | '+(r.handler||"-")+' | '+(r.account||"-")+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount expense">'+fmtCur(r.amount,r.currency)+'<span class="sub">'+fmtCur(r.amountKZT,"KZT")+'</span></div></div>'}
+    document.getElementById("expense-list").innerHTML=h;
+}
+function renderExchange(){
+    var d=loadD(),m=document.getElementById("exchange-month"),month=m?m.value:"";var list=d.exchange.slice().reverse();if(month)list=list.filter(function(r){return getM(r.date)===month});if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
+    var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">💱</div>暂无换汇</div>';
+    else for(var i=0;i<list.length;i++){var r=list[i];h+='<div class="record-item" onclick="editRecord(\'exchange\','+d.exchange.indexOf(r)+')"><div class="record-info"><div class="cat">'+r.fromCur+' → '+r.toCur+'</div><div class="meta">'+fmtD(r.date)+' | '+(r.handler||"-")+' | '+(r.account||"-")+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount exchange">'+fmtCur(r.fromAmt,r.fromCur)+' → '+fmtCur(r.toAmt,r.toCur)+'</div></div>'}
+    document.getElementById("exchange-list").innerHTML=h;
+}
+function renderShareholder(){
+    var d=loadD();var list=d.shareholder.slice().reverse();if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
+    var total=0;for(var i=0;i<list.length;i++)total+=toKZT(list[i].amount,list[i].currency);
+    document.getElementById("shareholder-total").textContent=list.length+"位股东 | 出资折合₸"+fmt(total);
+    var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">👥</div>暂无股东</div>';
+    else for(var i=0;i<list.length;i++){var r=list[i];h+='<div class="record-item" onclick="editRecord(\'shareholder\','+d.shareholder.indexOf(r)+')"><div class="record-info"><div class="cat">'+r.name+' ('+(r.share||0)+'%)</div><div class="meta">'+fmtD(r.date)+' | '+fmtCur(r.amount,r.currency)+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount shareholder">'+fmtCur(r.amount,r.currency)+'<span class="sub">折合₸'+fmt(toKZT(r.amount,r.currency))+'</span></div></div>'}
+    document.getElementById("shareholder-list").innerHTML=h;
+}
+function renderSummary(){
+    if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("summary-month").value,store=document.getElementById("summary-store").value;
+    var inc=d.income,exp=d.expense,exc=d.exchange,sh=d.shareholder;
+    if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month})}
+    if(store!=="全部"){inc=inc.filter(function(r){return r.handler===store});exp=exp.filter(function(r){return r.handler===store})}
+    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;var np=ti-te,pr=ti>0?(np/ti*100):0;
+    var h='<div class="summary-grid"><div class="summary-item"><div class="label">总收入(KZT)</div><div class="value" style="color:var(--green)">₸'+fmt(ti)+'</div></div><div class="summary-item"><div class="label">总支出(KZT)</div><div class="value" style="color:var(--red)">₸'+fmt(te)+'</div></div><div class="summary-item"><div class="label">净利润(KZT)</div><div class="value" style="color:'+(np>=0?'var(--green)':'var(--red)')+'">₸'+fmt(np)+'</div></div><div class="summary-item"><div class="label">净利润率</div><div class="value">'+fmt(pr)+'%</div></div></div>';
+    var aMap={};for(var i=0;i<ACCOUNTS.length;i++)aMap[ACCOUNTS[i]]=0;for(var i=0;i<inc.length;i++){if(inc[i].account&&aMap[inc[i].account]!==undefined)aMap[inc[i].account]+=inc[i].amountKZT||0}for(var i=0;i<exp.length;i++){if(exp[i].account&&aMap[exp[i].account]!==undefined)aMap[exp[i].account]-=exp[i].amountKZT||0}
+    h+='<div class="section-title">🏦 账户余额</div>';for(var i=0;i<ACCOUNTS.length;i++){var k=ACCOUNTS[i];h+='<div class="total-bar"><span class="label">'+k+'</span><span class="value" style="color:'+(aMap[k]>=0?'var(--green)':'var(--red)')+'">₸'+fmt(aMap[k])+'</span></div>'}
+    document.getElementById("summary-content").innerHTML=h;
+}
+function renderAnalysis(){
+    if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("analysis-month").value,store=document.getElementById("analysis-store").value;
+    var inc=d.income,exp=d.expense;if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month})}
+    if(store!=="全部"){inc=inc.filter(function(r){return r.handler===store});exp=exp.filter(function(r){return r.handler===store})}
+    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;
+    var h='<div class="section-title">📥 收入品类</div>';var ic=[];for(var i=0;i<INC_CATS.length;i++){var s=0;for(var j=0;j<inc.length;j++){if(inc[j].cat===INC_CATS[i])s+=inc[j].amountKZT||0}if(s>0)ic.push([INC_CATS[i],s])}ic.sort(function(a,b){return b[1]-a[1]});var mx=ic.length>0?ic[0][1]:1;for(var i=0;i<ic.length;i++){var p=ti>0?(ic[i][1]/ti*100):0;h+='<div class="chart-row"><span class="lbl">'+ic[i][0]+'</span><div class="bar-wrap"><div class="bar green" style="width:'+(ic[i][1]/mx*100)+'%"></div></div><span class="amt">₸'+fmt(ic[i][1])+' ('+fmt(p)+'%)</span></div>'}
+    h+='<div class="section-title" style="margin-top:16px">📤 支出品类</div>';var ec=[];for(var i=0;i<EXP_CATS.length;i++){var s=0;for(var j=0;j<exp.length;j++){if(exp[j].cat===EXP_CATS[i])s+=exp[j].amountKZT||0}if(s>0)ec.push([EXP_CATS[i],s])}ec.sort(function(a,b){return b[1]-a[1]});var mxe=ec.length>0?ec[0][1]:1;for(var i=0;i<ec.length;i++){var p=te>0?(ec[i][1]/te*100):0;h+='<div class="chart-row"><span class="lbl">'+ec[i][0]+'</span><div class="bar-wrap"><div class="bar red" style="width:'+(ec[i][1]/mxe*100)+'%"></div></div><span class="amt">₸'+fmt(ec[i][1])+' ('+fmt(p)+'%)</span></div>'}
+    // Commission by handler
+    h+='<div class="section-title" style="margin-top:16px">👤 经办人提成</div>';var cm={};for(var i=0;i<inc.length;i++){var r=inc[i];if(r.handler)cm[r.handler]=(cm[r.handler]||0)+(r.amountKZT||0)*COMM_RATE/100}var hl=[];for(var k in cm)hl.push([k,cm[k]]);hl.sort(function(a,b){return b[1]-a[1]});if(hl.length===0)h+='<div class="empty-state">暂无数据</div>';else for(var i=0;i<hl.length;i++)h+='<div class="total-bar"><span class="label">'+hl[i][0]+'</span><span class="value" style="color:var(--green)">₸'+fmt(hl[i][1])+'</span></div>';
+    document.getElementById("analysis-content").innerHTML=h;
+}
+function renderSalary(){
+    if(userRole!=="admin")return;var d=loadD(),sc=loadSC(),me=document.getElementById("salary-month"),month=me?me.value:"";var inc=d.income;if(month)inc=inc.filter(function(r){return getM(r.date)===month});
+    var cm={};for(var i=0;i<inc.length;i++){var r=inc[i];if(r.handler)cm[r.handler]=(cm[r.handler]||0)+(r.amountKZT||0)*COMM_RATE/100}
+    var nm={};for(var i=0;i<d.income.length;i++){if(d.income[i].handler)nm[d.income[i].handler]=true}for(var i=0;i<d.expense.length;i++){if(d.expense[i].handler)nm[d.expense[i].handler]=true}for(var k in sc)nm[k]=true;var names=[];for(var k in nm)names.push(k);names.sort();
+    var h='<div class="form-row"><div><label>月份</label><input type="month" id="salary-month" value="'+(month||new Date().toISOString().slice(0,7))+'" onchange="renderSalary()"></div></div><div class="card"><h3>💰 工资 ('+(month||"全部")+') | 提成率: '+COMM_RATE+'%</h3>';var tp=0;if(names.length===0)h+='<div class="empty-state">暂无数据</div>';else for(var i=0;i<names.length;i++){var n=names[i],cfg=sc[n]||{base:0,deduction:0},com=cm[n]||0,sal=cfg.base+com-cfg.deduction;tp+=sal;h+='<div class="salary-row"><span class="sname">'+n+'</span><span style="font-size:12px">底薪</span><input type="number" value="'+cfg.base+'" style="width:65px;text-align:center;padding:4px" onchange="updateBase(\''+n+'\',this.value)"><span class="sval" style="color:var(--green);font-size:12px">提成 ₸'+fmt(com)+'</span><span style="font-size:12px">扣除</span><input type="number" value="'+cfg.deduction+'" style="width:65px;text-align:center;padding:4px;color:var(--red)" onchange="updateDed(\''+n+'\',this.value)"><span class="sval" style="font-weight:700">实发 ₸'+fmt(sal)+'</span></div>'}h+='<div class="total-bar" style="margin-top:10px"><span class="label">合计</span><span class="value">₸'+fmt(tp)+'</span></div></div>';document.getElementById("salary-content").innerHTML=h;
+}
+function updateBase(n,v){var sc=loadSC();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].base=parseFloat(v)||0;saveSC(sc);renderSalary()}
+function updateDed(n,v){var sc=loadSC();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].deduction=parseFloat(v)||0;saveSC(sc);renderSalary()}
+
+function refreshAll(){renderIncome();renderExpense();renderExchange();renderShareholder();if(userRole==="admin"){renderSummary();renderAnalysis();renderSalary()}}
+
+// INIT
+if(userRole){document.getElementById("login-screen").style.display="none";applyPerms()}
+refreshAll();</script>
+</body>
+</html>
