@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>记账本</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px}
+.container{width:100%;max-width:400px}
+h1{text-align:center;color:#fff;font-size:28px;margin-bottom:32px;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+.card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;display:block;color:inherit}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.card:active{transform:scale(.98)}
+.card .icon{font-size:48px;margin-bottom:12px}
+.card h2{font-size:20px;margin-bottom:6px}
+.card p{font-size:13px;color:#6b7280}
+.card.bike{border-left:4px solid #2563eb}
+.card.mixue{border-left:4px solid #f59e0b}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>📒 记账本</h1>
+<a href="bike.html" class="card bike">
+<div class="icon">🚲</div>
+<h2>自行车店记账本</h2>
+<p>喜德盛自行车 · 三个分店 · 收支/换钱/提成/工资</p>
+</a>
+<a href="mixue.html" class="card mixue">
+<div class="icon">🍦</div>
+<h2>蜜雪合伙店记账本</h2>
+<p>蜜雪冰城 · KZT/CNY/USD · 股东分红</p>
+</a>
+</div>
+</body>
+</html>
