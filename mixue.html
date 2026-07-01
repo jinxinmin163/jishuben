@@ -176,25 +176,26 @@ input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 
 </div>
 
 <!-- MODAL -->
+
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
 <div class="modal">
 <h3 id="modal-title">记收入</h3>
 <div class="form-row"><div><label>日期</label><input type="date" id="modal-date"></div><div><label>经办人</label><input type="text" id="modal-handler" list="handler-list" placeholder="选择"><datalist id="handler-list"></datalist></div></div>
 <div id="modal-cat-row"><div class="form-row"><div><label>类别</label><select id="modal-cat"></select></div></div></div>
-<div id="modal-income-fields">
+<!-- Shared currency/amount/account fields (shown for income & expense) -->
+<div id="modal-shared-fields">
 <div class="form-row"><div><label>金额</label><input type="number" id="modal-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-currency"></select></div></div>
-<div class="form-row"><div><label>账户</label><select id="modal-account"></select></div><div><label>订单数</label><input type="number" id="modal-orders" placeholder="0"></div></div>
-<div class="form-row"><div><label>杯数</label><input type="number" id="modal-cups" placeholder="0"></div></div>
+<div class="form-row"><div><label>账户</label><select id="modal-account"></select></div><div id="modal-orders-field"><label>订单数</label><input type="number" id="modal-orders" placeholder="0"></div></div>
+<div class="form-row"><div id="modal-cups-field"><label>杯数</label><input type="number" id="modal-cups" placeholder="0"></div><div></div></div>
 </div>
-<div id="modal-expense-fields">
-<div class="form-row"><div><label>金额</label><input type="number" id="modal-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-currency"></select></div></div>
-<div class="form-row"><div><label>账户</label><select id="modal-account"></select></div></div>
-</div>
+<!-- Exchange specific -->
 <div id="modal-exchange-fields">
 <div class="form-row"><div><label>换出币种</label><select id="modal-ex-from-cur"></select></div><div><label>换出金额</label><input type="number" id="modal-ex-from-amt" step="0.01" placeholder="0.00"></div></div>
 <div class="form-row"><div><label>换入币种</label><select id="modal-ex-to-cur"></select></div><div><label>换入金额</label><input type="number" id="modal-ex-to-amt" step="0.01" placeholder="0.00"></div></div>
 <div class="form-row"><div><label>账户</label><select id="modal-ex-account"></select></div></div>
 </div>
+<!-- Shareholder specific -->
 <div id="modal-shareholder-fields">
 <div class="form-row"><div><label>股东姓名</label><input type="text" id="modal-sh-name" placeholder="姓名"></div><div><label>占股 %</label><input type="number" id="modal-sh-share" step="1" placeholder="0"></div></div>
 <div class="form-row"><div><label>出资金额</label><input type="number" id="modal-sh-amount" step="0.01" placeholder="0.00"></div><div><label>币种</label><select id="modal-sh-currency"></select></div></div>
@@ -206,9 +207,7 @@ input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 
 </div>
 <button class="btn btn-ghost btn-block" onclick="closeModal()" style="margin-top:6px">取消</button>
 </div>
-</div>
-
-<!-- SETTINGS MODAL -->
+</div><!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settings-modal">
 <div class="modal">
 <h3>⚙️ 设置</h3>
