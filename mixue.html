@@ -301,6 +301,10 @@ function openModal(type,record,idx){
     
     var ce=document.getElementById("modal-currency");ce.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)ce.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
     var ae=document.getElementById("modal-account");ae.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)ae.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
+    var exf=document.getElementById("modal-ex-from-cur");exf.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)exf.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
+    var ext=document.getElementById("modal-ex-to-cur");ext.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)ext.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
+    var exa=document.getElementById("modal-ex-account");exa.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)exa.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
+    var shc=document.getElementById("modal-sh-currency");shc.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)shc.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
     
     if(record){
         document.getElementById("modal-date").value=record.date||"";
