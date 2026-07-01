@@ -459,9 +459,9 @@ function showShareholderDetail(name){
 function renderSummary(){
     if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("summary-month").value,store=document.getElementById("summary-store").value;
     var inc=d.income,exp=d.expense,exc=d.exchange,sh=d.shareholder;
-    if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month})}
+    if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month});sh=sh.filter(function(r){return getM(r.date)===month})}
     if(store!=="全部"){inc=inc.filter(function(r){return r.handler===store});exp=exp.filter(function(r){return r.handler===store})}
-    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;var np=ti-te,pr=ti>0?(np/ti*100):0;
+    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var tsh=0;for(var i=0;i<sh.length;i++)tsh+=toKZT(sh[i].amount,sh[i].currency);ti+=tsh;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;var np=ti-te,pr=ti>0?(np/ti*100):0;
     var h='<div class="summary-grid"><div class="summary-item"><div class="label">总收入(KZT)</div><div class="value" style="color:var(--green)">₸'+fmt(ti)+'</div></div><div class="summary-item"><div class="label">总支出(KZT)</div><div class="value" style="color:var(--red)">₸'+fmt(te)+'</div></div><div class="summary-item"><div class="label">净利润(KZT)</div><div class="value" style="color:'+(np>=0?'var(--green)':'var(--red)')+'">₸'+fmt(np)+'</div></div><div class="summary-item"><div class="label">净利润率</div><div class="value">'+fmt(pr)+'%</div></div></div>';
     var aMap={};for(var i=0;i<ACCOUNTS.length;i++)aMap[ACCOUNTS[i]]=0;for(var i=0;i<inc.length;i++){if(inc[i].account&&aMap[inc[i].account]!==undefined)aMap[inc[i].account]+=inc[i].amountKZT||0}for(var i=0;i<exp.length;i++){if(exp[i].account&&aMap[exp[i].account]!==undefined)aMap[exp[i].account]-=exp[i].amountKZT||0}
     h+='<div class="section-title">🏦 账户余额</div>';for(var i=0;i<ACCOUNTS.length;i++){var k=ACCOUNTS[i];h+='<div class="total-bar"><span class="label">'+k+'</span><span class="value" style="color:'+(aMap[k]>=0?'var(--green)':'var(--red)')+'">₸'+fmt(aMap[k])+'</span></div>'}
@@ -472,9 +472,10 @@ function renderSummary(){
 }
 function renderAnalysis(){
     if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("analysis-month").value,store=document.getElementById("analysis-store").value;
+    var sh2=d.shareholder;if(month)sh2=sh2.filter(function(r){return getM(r.date)===month});if(store!=="全部")sh2=sh2.filter(function(r){return r.handler===store});
     var inc=d.income,exp=d.expense;if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month})}
     if(store!=="全部"){inc=inc.filter(function(r){return r.handler===store});exp=exp.filter(function(r){return r.handler===store})}
-    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;
+    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var tsh2=0;for(var i=0;i<sh2.length;i++)tsh2+=toKZT(sh2[i].amount,sh2[i].currency);ti+=tsh2;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;
     var h='<div class="section-title">📥 收入品类</div>';var ic=[];for(var i=0;i<INC_CATS.length;i++){var s=0;for(var j=0;j<inc.length;j++){if(inc[j].cat===INC_CATS[i])s+=inc[j].amountKZT||0}if(s>0)ic.push([INC_CATS[i],s])}ic.sort(function(a,b){return b[1]-a[1]});var mx=ic.length>0?ic[0][1]:1;for(var i=0;i<ic.length;i++){var p=ti>0?(ic[i][1]/ti*100):0;h+='<div class="chart-row"><span class="lbl">'+ic[i][0]+'</span><div class="bar-wrap"><div class="bar green" style="width:'+(ic[i][1]/mx*100)+'%"></div></div><span class="amt">₸'+fmt(ic[i][1])+' ('+fmt(p)+'%)</span></div>'}
     h+='<div class="section-title" style="margin-top:16px">📤 支出品类</div>';var ec=[];for(var i=0;i<EXP_CATS.length;i++){var s=0;for(var j=0;j<exp.length;j++){if(exp[j].cat===EXP_CATS[i])s+=exp[j].amountKZT||0}if(s>0)ec.push([EXP_CATS[i],s])}ec.sort(function(a,b){return b[1]-a[1]});var mxe=ec.length>0?ec[0][1]:1;for(var i=0;i<ec.length;i++){var p=te>0?(ec[i][1]/te*100):0;h+='<div class="chart-row"><span class="lbl">'+ec[i][0]+'</span><div class="bar-wrap"><div class="bar red" style="width:'+(ec[i][1]/mxe*100)+'%"></div></div><span class="amt">₸'+fmt(ec[i][1])+' ('+fmt(p)+'%)</span></div>'}
     // Commission by handler
