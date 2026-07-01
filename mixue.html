@@ -199,7 +199,7 @@ input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 
 <div id="modal-ex-cash-fields" class="hidden">
 <div class="form-row"><div><label>币种</label><select id="modal-ex-cash-cur"></select></div><div><label>金额</label><input type="number" id="modal-ex-cash-amt" step="0.01" placeholder="0.00"></div></div>
 </div>
-<div class="form-row"><div><label>账户</label><select id="modal-ex-account"></select></div></div>
+<div class="form-row"><div id="modal-ex-from-acc-row"><label>换出账户</label><select id="modal-ex-from-account"></select></div><div id="modal-ex-to-acc-row"><label>收到账户</label><select id="modal-ex-to-account"></select></div></div>
 </div>
 <!-- Shareholder specific -->
 <div id="modal-shareholder-fields">
@@ -309,7 +309,8 @@ function openModal(type,record,idx){
     var ae=document.getElementById("modal-account");ae.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)ae.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
     var exf=document.getElementById("modal-ex-from-cur");exf.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)exf.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
     var ext=document.getElementById("modal-ex-to-cur");ext.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)ext.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
-    var exa=document.getElementById("modal-ex-account");exa.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)exa.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
+    var exfa=document.getElementById("modal-ex-from-account");exfa.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)exfa.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
+    var exta=document.getElementById("modal-ex-to-account");exta.innerHTML="";for(var i=0;i<ACCOUNTS.length;i++)exta.innerHTML+='<option value="'+ACCOUNTS[i]+'">'+ACCOUNTS[i]+'</option>';
     var exc=document.getElementById("modal-ex-cash-cur");exc.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)exc.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
     var shc=document.getElementById("modal-sh-currency");shc.innerHTML="";for(var i=0;i<CURRENCIES.length;i++)shc.innerHTML+='<option value="'+CURRENCIES[i]+'">'+CURRENCIES[i]+'</option>';
     
@@ -319,14 +320,14 @@ function openModal(type,record,idx){
         document.getElementById("modal-note").value=record.note||"";
         if(type==="income"){document.getElementById("modal-amount").value=record.amount||"";document.getElementById("modal-currency").value=record.currency||"KZT";document.getElementById("modal-account").value=record.account||ACCOUNTS[0];document.getElementById("modal-orders").value=record.orders||"";document.getElementById("modal-cups").value=record.cups||"";document.getElementById("modal-cat").value=record.cat||INC_CATS[0]}
         else if(type==="expense"){document.getElementById("modal-amount").value=record.amount||"";document.getElementById("modal-currency").value=record.currency||"KZT";document.getElementById("modal-account").value=record.account||ACCOUNTS[0];document.getElementById("modal-cat").value=record.cat||EXP_CATS[0]}
-        else if(type==="exchange"){document.getElementById("modal-ex-type").value=record.exType||"exchange";toggleExType();if(record.exType&&record.exType!=="exchange"){document.getElementById("modal-ex-cash-cur").value=record.currency||"KZT";document.getElementById("modal-ex-cash-amt").value=record.amount||""}else{document.getElementById("modal-ex-from-cur").value=record.fromCur||"KZT";document.getElementById("modal-ex-from-amt").value=record.fromAmt||"";document.getElementById("modal-ex-to-cur").value=record.toCur||"KZT";document.getElementById("modal-ex-to-amt").value=record.toAmt||""}document.getElementById("modal-ex-account").value=record.account||ACCOUNTS[0]}
+        else if(type==="exchange"){document.getElementById("modal-ex-type").value=record.exType||"exchange";toggleExType();if(record.exType&&record.exType!=="exchange"){document.getElementById("modal-ex-cash-cur").value=record.currency||"KZT";document.getElementById("modal-ex-cash-amt").value=record.amount||""}else{document.getElementById("modal-ex-from-cur").value=record.fromCur||"KZT";document.getElementById("modal-ex-from-amt").value=record.fromAmt||"";document.getElementById("modal-ex-to-cur").value=record.toCur||"KZT";document.getElementById("modal-ex-to-amt").value=record.toAmt||""}document.getElementById("modal-ex-from-account").value=record.fromAccount||ACCOUNTS[0];document.getElementById("modal-ex-to-account").value=record.toAccount||ACCOUNTS[0]}
         else if(type==="shareholder"){document.getElementById("modal-sh-name").value=record.name||"";document.getElementById("modal-sh-amount").value=record.amount||"";document.getElementById("modal-sh-currency").value=record.currency||"CNY";document.getElementById("modal-sh-share").value=record.share||""}
     }else{
         var today=new Date().toISOString().split("T")[0];
         document.getElementById("modal-date").value=today;document.getElementById("modal-handler").value="";document.getElementById("modal-note").value="";
         document.getElementById("modal-amount").value="";document.getElementById("modal-currency").value="KZT";document.getElementById("modal-account").value=ACCOUNTS[0];
         document.getElementById("modal-orders").value="";document.getElementById("modal-cups").value="";
-        document.getElementById("modal-ex-type").value="exchange";toggleExType();document.getElementById("modal-ex-from-cur").value="KZT";document.getElementById("modal-ex-from-amt").value="";document.getElementById("modal-ex-to-cur").value="CNY";document.getElementById("modal-ex-to-amt").value="";document.getElementById("modal-ex-cash-cur").value="KZT";document.getElementById("modal-ex-cash-amt").value="";document.getElementById("modal-ex-account").value=ACCOUNTS[0];
+        document.getElementById("modal-ex-type").value="exchange";toggleExType();document.getElementById("modal-ex-from-cur").value="KZT";document.getElementById("modal-ex-from-amt").value="";document.getElementById("modal-ex-to-cur").value="CNY";document.getElementById("modal-ex-to-amt").value="";document.getElementById("modal-ex-cash-cur").value="KZT";document.getElementById("modal-ex-cash-amt").value="";document.getElementById("modal-ex-from-account").value=ACCOUNTS[0];document.getElementById("modal-ex-to-account").value=ACCOUNTS[0];
         document.getElementById("modal-sh-name").value="";document.getElementById("modal-sh-amount").value="";document.getElementById("modal-sh-currency").value="CNY";document.getElementById("modal-sh-share").value="";
         if(type==="income")document.getElementById("modal-cat").value=INC_CATS[0];
         if(type==="expense")document.getElementById("modal-cat").value=EXP_CATS[0];
@@ -334,7 +335,7 @@ function openModal(type,record,idx){
     document.getElementById("modal").classList.add("show");populateHandlerList();
 }
 function populateHandlerList(){var dl=document.getElementById("handler-list");if(!dl)return;var d=loadD();var s={};for(var i=0;i<d.income.length;i++){if(d.income[i].handler)s[d.income[i].handler]=true}for(var i=0;i<d.expense.length;i++){if(d.expense[i].handler)s[d.expense[i].handler]=true}for(var i=0;i<HANDLERS.length;i++)s[HANDLERS[i]]=true;dl.innerHTML="";for(var k in s)dl.innerHTML+='<option value="'+k+'">'}
-function toggleExType(){var t=document.getElementById("modal-ex-type").value;document.getElementById("modal-ex-rate-fields").classList.toggle("hidden",t!=="exchange");document.getElementById("modal-ex-cash-fields").classList.toggle("hidden",t==="exchange")}function closeModal(){document.getElementById("modal").classList.remove("show")}
+function toggleExType(){var t=document.getElementById("modal-ex-type").value;document.getElementById("modal-ex-rate-fields").classList.toggle("hidden",t!=="exchange");document.getElementById("modal-ex-cash-fields").classList.toggle("hidden",t==="exchange");document.getElementById("modal-ex-from-acc-row").classList.toggle("hidden",t==="deposit");document.getElementById("modal-ex-to-acc-row").classList.toggle("hidden",t==="withdraw")}function closeModal(){document.getElementById("modal").classList.remove("show")}
 
 function saveRecord(){
     var d=loadD();var r={};r.date=document.getElementById("modal-date").value;r.handler=document.getElementById("modal-handler").value||"";r.note=document.getElementById("modal-note").value||"";
@@ -348,7 +349,7 @@ function saveRecord(){
         r.exType=document.getElementById("modal-ex-type").value;
         if(r.exType==="exchange"){r.fromCur=document.getElementById("modal-ex-from-cur").value;r.fromAmt=parseFloat(document.getElementById("modal-ex-from-amt").value)||0;r.toCur=document.getElementById("modal-ex-to-cur").value;r.toAmt=parseFloat(document.getElementById("modal-ex-to-amt").value)||0;if(r.fromAmt<=0||r.toAmt<=0){alert("请输入金额");return}if(r.fromCur===r.toCur){alert("币种不能相同");return}}
         else{r.currency=document.getElementById("modal-ex-cash-cur").value;r.amount=parseFloat(document.getElementById("modal-ex-cash-amt").value)||0;if(r.amount<=0){alert("请输入金额");return}}
-        r.account=document.getElementById("modal-ex-account").value;
+        r.fromAccount=document.getElementById("modal-ex-from-account").value;r.toAccount=document.getElementById("modal-ex-to-account").value;
     }else if(currentType==="shareholder"){
         r.name=document.getElementById("modal-sh-name").value;r.amount=parseFloat(document.getElementById("modal-sh-amount").value)||0;r.currency=document.getElementById("modal-sh-currency").value;r.share=parseFloat(document.getElementById("modal-sh-share").value)||0;
         if(!r.name){alert("请输入股东姓名");return}if(r.amount<=0){alert("请输入出资金额");return}
@@ -403,7 +404,7 @@ function renderExpense(){
 function renderExchange(){
     var d=loadD(),m=document.getElementById("exchange-month"),month=m?m.value:"";var list=d.exchange.slice().reverse();if(month)list=list.filter(function(r){return getM(r.date)===month});if(userRole!=="admin")list=list.filter(function(r){return is2Day(r.date)});
     var h="";if(list.length===0)h='<div class="empty-state"><div class="icon">💱</div>暂无换汇</div>';
-    else for(var i=0;i<list.length;i++){var r=list[i];var label=r.exType==="withdraw"?"🏧 取现":r.exType==="deposit"?"🏦 存钱":r.fromCur+" → "+r.toCur;var amt=r.exType&&r.exType!=="exchange"?fmtCur(r.amount,r.currency):fmtCur(r.fromAmt,r.fromCur)+" → "+fmtCur(r.toAmt,r.toCur);h+='<div class="record-item" onclick="editRecord(\'exchange\','+d.exchange.indexOf(r)+')"><div class="record-info"><div class="cat">'+label+'</div><div class="meta">'+fmtD(r.date)+' | '+(r.handler||"-")+' | '+(r.account||"-")+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount exchange">'+amt+'</div></div>'}
+    else for(var i=0;i<list.length;i++){var r=list[i];var label=r.exType==="withdraw"?"🏧 取现":r.exType==="deposit"?"🏦 存钱":r.fromCur+" → "+r.toCur;var amt=r.exType&&r.exType!=="exchange"?fmtCur(r.amount,r.currency):fmtCur(r.fromAmt,r.fromCur)+" → "+fmtCur(r.toAmt,r.toCur);var acc=r.exType==="withdraw"?(r.fromAccount||"-"):r.exType==="deposit"?(r.toAccount||"-"):(r.fromAccount||"-")+" → "+(r.toAccount||"-");h+='<div class="record-item" onclick="editRecord(\'exchange\','+d.exchange.indexOf(r)+')"><div class="record-info"><div class="cat">'+label+'</div><div class="meta">'+fmtD(r.date)+' | '+(r.handler||"-")+' | '+acc+'</div>'+(r.note?'<div class="meta" style="color:var(--orange)">'+r.note+'</div>':"")+'</div><div class="record-amount exchange">'+amt+'</div></div>'}
     document.getElementById("exchange-list").innerHTML=h;
 }
 function renderShareholder(){
