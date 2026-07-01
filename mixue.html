@@ -461,16 +461,29 @@ function renderSummary(){
     var inc=d.income,exp=d.expense,exc=d.exchange,sh=d.shareholder;
     if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month});sh=sh.filter(function(r){return getM(r.date)===month})}
     if(store!=="全部"){inc=inc.filter(function(r){return r.handler===store});exp=exp.filter(function(r){return r.handler===store})}
-    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var tsh=0;for(var i=0;i<sh.length;i++)tsh+=toKZT(sh[i].amount,sh[i].currency);ti+=tsh;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;var np=ti-te,pr=ti>0?(np/ti*100):0;
-    var h='<div class="summary-grid"><div class="summary-item"><div class="label">总收入(KZT)</div><div class="value" style="color:var(--green)">₸'+fmt(ti)+'</div></div><div class="summary-item"><div class="label">总支出(KZT)</div><div class="value" style="color:var(--red)">₸'+fmt(te)+'</div></div><div class="summary-item"><div class="label">净利润(KZT)</div><div class="value" style="color:'+(np>=0?'var(--green)':'var(--red)')+'">₸'+fmt(np)+'</div></div><div class="summary-item"><div class="label">净利润率</div><div class="value">'+fmt(pr)+'%</div></div></div>';
-    var aMap={};for(var i=0;i<ACCOUNTS.length;i++)aMap[ACCOUNTS[i]]=0;for(var i=0;i<inc.length;i++){if(inc[i].account&&aMap[inc[i].account]!==undefined)aMap[inc[i].account]+=inc[i].amountKZT||0}for(var i=0;i<exp.length;i++){if(exp[i].account&&aMap[exp[i].account]!==undefined)aMap[exp[i].account]-=exp[i].amountKZT||0}
-    h+='<div class="section-title">🏦 账户余额</div>';for(var i=0;i<ACCOUNTS.length;i++){var k=ACCOUNTS[i];h+='<div class="total-bar"><span class="label">'+k+'</span><span class="value" style="color:'+(aMap[k]>=0?'var(--green)':'var(--red)')+'">₸'+fmt(aMap[k])+'</span></div>'}
-    // Shareholder profit distribution
-    h+='<div class="section-title">👥 股东分红预估</div>';var sh=d.shareholder;var shAgg={},shNames=[];for(var i=0;i<sh.length;i++){var s=sh[i];if(!shAgg[s.name]){shAgg[s.name]={name:s.name,share:s.share||0};shNames.push(s.name)}}
+    var ic={};for(var i=0;i<CURRENCIES.length;i++)ic[CURRENCIES[i]]=0;
+    for(var i=0;i<inc.length;i++){var c=inc[i].currency||"KZT";ic[c]=(ic[c]||0)+(inc[i].amount||0)}
+    for(var i=0;i<sh.length;i++){var c=sh[i].currency||"CNY";ic[c]=(ic[c]||0)+(sh[i].amount||0)}
+    var ec={};for(var i=0;i<CURRENCIES.length;i++)ec[CURRENCIES[i]]=0;
+    for(var i=0;i<exp.length;i++){var c=exp[i].currency||"KZT";ec[c]=(ec[c]||0)+(exp[i].amount||0)}
+    var ti=0;for(var i=0;i<inc.length;i++)ti+=inc[i].amountKZT||0;var te=0;for(var i=0;i<exp.length;i++)te+=exp[i].amountKZT||0;var tsh2=0;for(var i=0;i<sh.length;i++)tsh2+=toKZT(sh[i].amount,sh[i].currency);
+    var np=ti+tsh2-te,pr=(ti+tsh2)>0?(np/(ti+tsh2)*100):0;
+    var h="";h+='<div class="section-title">📥 收入</div><div class="summary-grid">';
+    for(var i=0;i<CURRENCIES.length;i++){var c=CURRENCIES[i];if(ic[c]>0)h+='<div class="summary-item"><div class="label">收入('+c+')</div><div class="value" style="color:var(--green)">'+fmtCur(ic[c],c)+'</div></div>'}
+    h+='</div><div class="section-title">📤 支出</div><div class="summary-grid">';
+    for(var i=0;i<CURRENCIES.length;i++){var c=CURRENCIES[i];if(ec[c]>0)h+='<div class="summary-item"><div class="label">支出('+c+')</div><div class="value" style="color:var(--red)">'+fmtCur(ec[c],c)+'</div></div>'}
+    h+='</div><div class="total-bar"><span class="label">净利润(KZT折合)</span><span class="value" style="color:'+(np>=0?'var(--green)':'var(--red)')+'">₸'+fmt(np)+'</span></div>';
+    var A2=[{n:"现金KZT",c:"KZT"},{n:"Kaspi店铺",c:"KZT"},{n:"银行KZT",c:"KZT"},{n:"Wolt/Glovo待结算",c:"KZT"},{n:"现金RMB",c:"CNY"},{n:"微信/支付宝RMB",c:"CNY"},{n:"USD现金",c:"USD"}];
+    h+='<div class="section-title">🏦 账户余额</div>';
+    for(var i=0;i<A2.length;i++){var a=A2[i],bal=0;
+    for(var j=0;j<inc.length;j++){if(inc[j].account===a.n)bal+=inc[j].currency===a.c?inc[j].amount:0}
+    for(var j=0;j<exp.length;j++){if(exp[j].account===a.n)bal-=exp[j].currency===a.c?exp[j].amount:0}
+    for(var j=0;j<exc.length;j++){var r=exc[j];if(r.exType==="exchange"){if(r.fromAccount===a.n&&r.fromCur===a.c)bal-=r.fromAmt;if(r.toAccount===a.n&&r.toCur===a.c)bal+=r.toAmt}else if(r.exType==="withdraw"){if(r.fromAccount===a.n&&r.currency===a.c)bal-=r.amount}else if(r.exType==="deposit"){if(r.toAccount===a.n&&r.currency===a.c)bal+=r.amount}}
+    for(var j=0;j<sh.length;j++){if(!sh[j].account&&a.n==="现金RMB")bal+=sh[j].currency==="CNY"?sh[j].amount:0}
+    h+='<div class="total-bar"><span class="label">'+a.n+'</span><span class="value" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+fmtCur(bal,a.c)+'</span></div>';}
+    h+='<div class="section-title">👥 股东分红预估</div>';var shAgg={},shNames=[];for(var i=0;i<sh.length;i++){var s=sh[i];if(!shAgg[s.name]){shAgg[s.name]={name:s.name,share:s.share||0};shNames.push(s.name)}}
     if(shNames.length===0)h+='<div class="empty-state">暂无股东</div>';else for(var i=0;i<shNames.length;i++){var sa=shAgg[shNames[i]],div=np>0?np*sa.share/100:0;h+='<div class="total-bar"><span class="label">'+sa.name+' ('+sa.share+'%)</span><span class="value" style="color:'+(div>0?'var(--green)':'var(--red)')+'">₸'+fmt(div)+'</span></div>'}
-    document.getElementById("summary-content").innerHTML=h;
-}
-function renderAnalysis(){
+    document.getElementById("summary-content").innerHTML=h;}function renderAnalysis(){
     if(userRole!=="admin")return;var d=loadD(),month=document.getElementById("analysis-month").value,store=document.getElementById("analysis-store").value;
     var sh2=d.shareholder;if(month)sh2=sh2.filter(function(r){return getM(r.date)===month});if(store!=="全部")sh2=sh2.filter(function(r){return r.handler===store});
     var inc=d.income,exp=d.expense;if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month})}
@@ -496,42 +509,31 @@ function renderAccounts(){
     var d=loadD(),me=document.getElementById("accounts-month"),month=me?me.value:"";
     var inc=d.income,exp=d.expense,exc=d.exchange,sh=d.shareholder;
     if(month){inc=inc.filter(function(r){return getM(r.date)===month});exp=exp.filter(function(r){return getM(r.date)===month});exc=exc.filter(function(r){return getM(r.date)===month});sh=sh.filter(function(r){return getM(r.date)===month})}
-    var bal={};for(var i=0;i<ACCOUNTS.length;i++)bal[ACCOUNTS[i]]={inflow:0,outflow:0,exIn:0,exOut:0,shIn:0};
-    // Income per account
-    for(var i=0;i<inc.length;i++){var r=inc[i];if(r.account&&bal[r.account])bal[r.account].inflow+=r.amountKZT||0}
-    // Expense per account
-    for(var i=0;i<exp.length;i++){var r=exp[i];if(r.account&&bal[r.account])bal[r.account].outflow+=r.amountKZT||0}
-    // Exchange flows
+    var A=[{n:"现金KZT",c:"KZT"},{n:"Kaspi店铺",c:"KZT"},{n:"银行KZT",c:"KZT"},{n:"Wolt/Glovo待结算",c:"KZT"},{n:"现金RMB",c:"CNY"},{n:"微信/支付宝RMB",c:"CNY"},{n:"USD现金",c:"USD"}];
+    var B={};for(var i=0;i<A.length;i++)B[A[i].n]={inflow:0,outflow:0,exIn:0,exOut:0,shIn:0,cur:A[i].c};
+    for(var i=0;i<inc.length;i++){var r=inc[i];if(r.account&&B[r.account]&&r.currency===B[r.account].cur)B[r.account].inflow+=r.amount||0}
+    for(var i=0;i<exp.length;i++){var r=exp[i];if(r.account&&B[r.account]&&r.currency===B[r.account].cur)B[r.account].outflow+=r.amount||0}
     for(var i=0;i<exc.length;i++){
         var r=exc[i];
-        if(r.exType==="exchange"){
-            if(r.fromAccount&&bal[r.fromAccount])bal[r.fromAccount].exOut+=toKZT(r.fromAmt,r.fromCur);
-            if(r.toAccount&&bal[r.toAccount])bal[r.toAccount].exIn+=toKZT(r.toAmt,r.toCur);
-        }else if(r.exType==="withdraw"){
-            if(r.fromAccount&&bal[r.fromAccount])bal[r.fromAccount].exOut+=toKZT(r.amount,r.currency);
-        }else if(r.exType==="deposit"){
-            if(r.toAccount&&bal[r.toAccount])bal[r.toAccount].exIn+=toKZT(r.amount,r.currency);
-        }
+        if(r.exType==="exchange"){if(r.fromAccount&&B[r.fromAccount]&&r.fromCur===B[r.fromAccount].cur)B[r.fromAccount].exOut+=r.fromAmt;if(r.toAccount&&B[r.toAccount]&&r.toCur===B[r.toAccount].cur)B[r.toAccount].exIn+=r.toAmt}
+        else if(r.exType==="withdraw"){if(r.fromAccount&&B[r.fromAccount]&&r.currency===B[r.fromAccount].cur)B[r.fromAccount].exOut+=r.amount}
+        else if(r.exType==="deposit"){if(r.toAccount&&B[r.toAccount]&&r.currency===B[r.toAccount].cur)B[r.toAccount].exIn+=r.amount}
     }
-    // Shareholder investments
-    for(var i=0;i<sh.length;i++){var r=sh[i];if(!r.account)continue;if(bal[r.account])bal[r.account].shIn+=toKZT(r.amount,r.currency)}
-    var totalNet=0;
+    for(var i=0;i<sh.length;i++){var r=sh[i];if(!r.account&&B["现金RMB"]&&r.currency==="CNY")B["现金RMB"].shIn+=r.amount}
+    var totalKZT=0;
     var h='<div class="card"><h3>🏦 账户与余额 '+(month||"全部")+'</h3>';
-    for(var i=0;i<ACCOUNTS.length;i++){
-        var a=ACCOUNTS[i],b=bal[a],net=b.inflow-b.outflow+b.exIn-b.exOut+b.shIn;
-        totalNet+=net;
-        h+='<div class="total-bar" style="flex-wrap:wrap;padding:12px 14px">';
-        h+='<span class="label" style="font-weight:600;font-size:14px">'+a+'</span>';
-        h+='<span class="value" style="color:'+(net>=0?'var(--green)':'var(--red)')+'">₸'+fmt(net)+'</span>';
-        h+='<div style="width:100%;display:flex;gap:8px;margin-top:6px;font-size:11px;color:var(--sub);flex-wrap:wrap">';
-        h+='<span>📥收入 +₸'+fmt(b.inflow)+'</span><span>📤支出 -₸'+fmt(b.outflow)+'</span>';
-        if(b.exIn>0||b.exOut>0)h+='<span>💱换汇 +₸'+fmt(b.exIn)+' -₸'+fmt(b.exOut)+'</span>';
-        if(b.shIn>0)h+='<span>👥出资 +₸'+fmt(b.shIn)+'</span>';
+    for(var i=0;i<A.length;i++){
+        var a=A[i],b=B[a.n],net=b.inflow-b.outflow+b.exIn-b.exOut+b.shIn;
+        totalKZT+=toKZT(net,a.c);
+        h+='<div class="total-bar" style="flex-wrap:wrap;padding:12px 14px"><span class="label" style="font-weight:600;font-size:14px">'+a.n+'</span><span class="value" style="color:'+(net>=0?'var(--green)':'var(--red)')+'">'+fmtCur(net,a.c)+'</span><div style="width:100%;display:flex;gap:8px;margin-top:6px;font-size:11px;color:var(--sub);flex-wrap:wrap">';
+        if(b.inflow>0)h+='<span>📥收入 +'+fmtCur(b.inflow,a.c)+'</span>';
+        if(b.outflow>0)h+='<span>📤支出 -'+fmtCur(b.outflow,a.c)+'</span>';
+        if(b.exIn>0||b.exOut>0)h+='<span>💱换汇 +'+fmtCur(b.exIn,a.c)+' -'+fmtCur(b.exOut,a.c)+'</span>';
+        if(b.shIn>0)h+='<span>👥出资 +'+fmtCur(b.shIn,a.c)+'</span>';
         h+='</div></div>';
     }
-    h+='<div class="total-bar" style="background:var(--primary);color:#fff"><span class="label" style="color:#fff">总计</span><span class="value">₸'+fmt(totalNet)+'</span></div>';
-    h+='</div>';
-    document.getElementById("accounts-content").innerHTML=h;
+    h+='<div class="total-bar" style="background:var(--primary);color:#fff"><span class="label" style="color:#fff">总计(KZT)</span><span class="value">₸'+fmt(totalKZT)+'</span></div></div>';
+    document.getElementById("accounts-content").innerHTML=h;}
 }
 
 function refreshAll(){renderIncome();renderExpense();renderExchange();renderShareholder();renderAccounts();if(userRole==="admin"){renderSummary();renderAnalysis();renderSalary()}}
