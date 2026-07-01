@@ -285,8 +285,8 @@ function openModal(type,record,idx){
     var t=document.getElementById("modal-title");
     if(type==="income")t.textContent="记收入";else if(type==="expense")t.textContent="记支出";else if(type==="exchange")t.textContent="记换汇";else t.textContent="记股东出资";
     document.getElementById("modal-delete").style.display=(currentEditIdx>=0)?"":"none";
-    document.getElementById("modal-income-fields").classList.toggle("hidden",type!=="income");
-    document.getElementById("modal-expense-fields").classList.toggle("hidden",type!=="expense");
+    document.getElementById("modal-shared-fields").classList.toggle("hidden",type==="exchange"||type==="shareholder");document.getElementById("modal-orders-field").classList.toggle("hidden",type!=="income");document.getElementById("modal-cups-field").classList.toggle("hidden",type!=="income");
+    
     document.getElementById("modal-exchange-fields").classList.toggle("hidden",type!=="exchange");
     document.getElementById("modal-shareholder-fields").classList.toggle("hidden",type!=="shareholder");
     
