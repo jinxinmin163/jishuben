@@ -186,6 +186,7 @@ input:focus,select:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 
 <h3 id="modal-title">记收入</h3>
 <div class="form-row"><div><label>日期</label><input type="date" id="modal-date"></div><div><label>店铺</label><select id="modal-store"></select></div></div>
 <div class="form-row"><div><label>类别</label><select id="modal-cat"></select></div></div>
+<div class="form-row"><div><label>名称</label><input type="text" id="modal-name" placeholder="商品名称或说明"></div></div>
 <div class="form-row"><div id="modal-cost-row"><label>成本 ¥</label><input type="number" id="modal-cost" step="0.01" oninput="updateProfitPreview()" placeholder="0"></div><div id="modal-comm-row"><label>提成 %</label><input type="number" id="modal-commrate" step="1" oninput="updateProfitPreview()" placeholder="10"></div></div>
 <div class="form-row"><div><label>金额 ¥</label><input type="number" id="modal-amount" step="0.01" oninput="updateProfitPreview()" placeholder="0.00"></div></div>
 <div id="profit-preview" style="font-size:12px;color:var(--sub);margin-bottom:6px"></div>
