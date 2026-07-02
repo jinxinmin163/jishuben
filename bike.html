@@ -255,7 +255,7 @@ textarea{resize:vertical;min-height:50px}
 // ====== DATA MODEL ======
 var DICT_DEFAULTS = {
   stores: ['东湖印象','太古里','新和县'],
-  income_cats: ['整车','配件','维修','二手','打包','废品回收','租赁','其他'],
+  income_cats: ['整车销售','维修','配件','二手','打包','废品回收','租赁','组装','其他'],
   expense_cats: ['进货/采购','房租','装修','工资','运费/物流','工具/设备','日常/杂项'],
   handlers: []
 };
@@ -271,7 +271,7 @@ function STORES() { return loadDict().stores; }
 function INCOME_CATS() { return loadDict().income_cats; }
 function EXPENSE_CATS() { return loadDict().expense_cats; }
 function HANDLERS() { return loadDict().handlers || []; }
-var DEFAULT_RATES = {'整车':10,'配件':25,'维修':25,'二手':25,'打包':50,'废品回收':70,'租赁':10,'其他':10};
+var DEFAULT_RATES = {'整车销售':10,'配件':25,'维修':25,'二手':25,'打包':50,'废品回收':70,'租赁':10,'组装':10,'其他':10};
 function getDefaultRate(cat) { return DEFAULT_RATES[cat] || 10; }
 var ADMIN_PWD = 'admin888';
 var currentStore = 'all';
