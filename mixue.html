@@ -234,6 +234,17 @@ textarea{resize:vertical;min-height:50px}
   </div>
 </div>
 
+
+<div id="modal-edit" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal" style="max-height:90vh">
+    <h3>✏️ 编辑记录</h3>
+    <div id="edit-form-content"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('modal-edit').classList.remove('show')">取消</button>
+      <button class="btn btn-primary" onclick="saveEdit()">💾 保存修改</button>
+    </div>
+  </div>
+</div>
 <div id="modal-detail" class="modal-overlay">
   <div class="detail-modal" id="detail-content"></div>
 </div>
@@ -337,7 +348,127 @@ function updateDed(n,v){var sc=loadSC();if(!sc[n])sc[n]={base:0,deduction:0};sc[
 function renderAccounts(){if(userRole!=='admin')return;var d=loadD();var B={};for(var i=0;i<ACCOUNTS().length;i++)B[ACCOUNTS()[i]]={inflow:0,outflow:0,exIn:0,exOut:0,shIn:0,cur:ACCT_CUR()[ACCOUNTS()[i]]};for(var i=0;i<d.income.length;i++){var r=d.income[i];if(r.account&&B[r.account]&&r.currency===B[r.account].cur)B[r.account].inflow+=r.amount||0}for(var i=0;i<d.expense.length;i++){var r=d.expense[i];if(r.account&&B[r.account]&&r.currency===B[r.account].cur)B[r.account].outflow+=r.amount||0}for(var i=0;i<d.exchange.length;i++){var r=d.exchange[i];if(r.exType==='exchange'){if(r.fromAccount&&B[r.fromAccount])B[r.fromAccount].exOut+=r.fromAmt||0;if(r.toAccount&&B[r.toAccount])B[r.toAccount].exIn+=r.toAmt||0}else if(r.exType==='withdraw'){if(r.fromAccount&&B[r.fromAccount])B[r.fromAccount].exOut+=r.amount||0}else if(r.exType==='deposit'){if(r.toAccount&&B[r.toAccount])B[r.toAccount].exIn+=r.amount||0}}for(var i=0;i<d.shareholder.length;i++){var r=d.shareholder[i];if(r.account&&B[r.account]&&r.currency===B[r.account].cur)B[r.account].shIn+=r.amount||0;else{for(var j=0;j<ACCOUNTS().length;j++){if(ACCT_CUR()[ACCOUNTS()[j]]===r.currency)B[ACCOUNTS()[j]].shIn+=r.amount||0}}}var h='<div class="card"><h3>🏦 账户与余额</h3>';for(var i=0;i<ACCOUNTS().length;i++){var a=ACCOUNTS()[i],b=B[a];var net=b.inflow-b.outflow+b.exIn-b.exOut+b.shIn;h+='<div class="total-bar" style="flex-wrap:wrap;padding:12px 14px"><span class="label" style="font-weight:600;font-size:14px">'+a+'</span><span class="value" style="color:'+(net>=0?'var(--green)':'var(--red)')+'">'+fmtCur(net,b.cur)+'</span><div style="width:100%;display:flex;gap:8px;margin-top:6px;font-size:11px;color:var(--sub);flex-wrap:wrap">';if(b.inflow>0)h+='<span>📥收入 +'+fmtCur(b.inflow,b.cur)+'</span>';if(b.outflow>0)h+='<span>📤支出 -'+fmtCur(b.outflow,b.cur)+'</span>';if(b.exIn>0||b.exOut>0)h+='<span>💱换汇 +'+fmtCur(b.exIn,b.cur)+' -'+fmtCur(b.exOut,b.cur)+'</span>';if(b.shIn>0)h+='<span>👥出资 +'+fmtCur(b.shIn,b.cur)+'</span>';h+='</div></div>'}h+='</div>';document.getElementById('accounts-content').innerHTML=h}
 
 // ====== DETAIL MODAL ======
-function showDetail(id){var d=loadD();var all=d.income.concat(d.expense).concat(d.exchange).concat(d.shareholder);var rec=null;for(var i=0;i<all.length;i++){if(all[i].id===id){rec=all[i];break}}if(!rec)return;var h='';if(rec.type==='income'){h+='<h3>📥 收入详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--green)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.handler)h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler)+'</span></div>';if(rec.cost>0)h+='<div class="line"><span>成本</span><span class="val">'+fmtCur(rec.cost,rec.currency)+'</span></div>';if(rec.profit>0)h+='<div class="line"><span>利润</span><span class="val" style="color:var(--green)">'+fmtCur(rec.profit,rec.currency)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='expense'){h+='<h3>📤 支出详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--red)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.handler)h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='exchange'){h+='<h3>💱 换汇详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>类型</span><span class="val">'+(rec.exType==='exchange'?'换汇':rec.exType==='withdraw'?'取现':'存钱')+'</span></div>';if(rec.fromAccount)h+='<div class="line"><span>换出账户</span><span class="val">'+esc(rec.fromAccount)+'</span></div>';if(rec.fromAmt)h+='<div class="line"><span>换出金额</span><span class="val" style="color:var(--red)">'+fmtCur(rec.fromAmt,rec.fromCur||'KZT')+'</span></div>';if(rec.toAccount)h+='<div class="line"><span>收到账户</span><span class="val">'+esc(rec.toAccount)+'</span></div>';if(rec.toAmt)h+='<div class="line"><span>收到金额</span><span class="val" style="color:var(--green)">'+fmtCur(rec.toAmt,rec.toCur||'KZT')+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='shareholder'){h+='<h3>👥 股东出资详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>股东</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--primary)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}h+='<button class="btn btn-outline btn-block" style="margin-top:12px;color:var(--red)" onclick="deleteRecord('+id+')">🗑 删除记录</button>';document.getElementById('detail-content').innerHTML=h;document.getElementById('modal-detail').classList.add('show')}
+function showDetail(id){var d=loadD();var all=d.income.concat(d.expense).concat(d.exchange).concat(d.shareholder);var rec=null;for(var i=0;i<all.length;i++){if(all[i].id===id){rec=all[i];break}}if(!rec)return;var h='';if(rec.type==='income'){h+='<h3>📥 收入详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--green)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.handler)h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler)+'</span></div>';if(rec.cost>0)h+='<div class="line"><span>成本</span><span class="val">'+fmtCur(rec.cost,rec.currency)+'</span></div>';if(rec.profit>0)h+='<div class="line"><span>利润</span><span class="val" style="color:var(--green)">'+fmtCur(rec.profit,rec.currency)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='expense'){h+='<h3>📤 支出详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--red)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.handler)h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='exchange'){h+='<h3>💱 换汇详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>类型</span><span class="val">'+(rec.exType==='exchange'?'换汇':rec.exType==='withdraw'?'取现':'存钱')+'</span></div>';if(rec.fromAccount)h+='<div class="line"><span>换出账户</span><span class="val">'+esc(rec.fromAccount)+'</span></div>';if(rec.fromAmt)h+='<div class="line"><span>换出金额</span><span class="val" style="color:var(--red)">'+fmtCur(rec.fromAmt,rec.fromCur||'KZT')+'</span></div>';if(rec.toAccount)h+='<div class="line"><span>收到账户</span><span class="val">'+esc(rec.toAccount)+'</span></div>';if(rec.toAmt)h+='<div class="line"><span>收到金额</span><span class="val" style="color:var(--green)">'+fmtCur(rec.toAmt,rec.toCur||'KZT')+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='shareholder'){h+='<h3>👥 股东出资详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>股东</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>金额</span><span class="val" style="color:var(--primary)">'+fmtCur(rec.amount,rec.currency)+'</span></div>';if(rec.account)h+='<div class="line"><span>账户</span><span class="val">'+esc(rec.account)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}h+='<button class="btn btn-outline btn-block" style="margin-top:12px;color:var(--red)" onclick="deleteRecord('+id+')">🗑 删除记录</button>';if(userRole==='admin')h+='<button class="btn btn-primary btn-block" style="margin-top:6px" onclick="document.getElementById(\'modal-detail\').classList.remove(\'show\');openEdit('+id+')">✏️ 编辑记录</button>';document.getElementById('detail-content').innerHTML=h;document.getElementById('modal-detail').classList.add('show')}
+
+// ====== EDIT RECORD ======
+var editingId = null;
+function openEdit(id) {
+  var d = loadD();
+  var all = d.income.concat(d.expense).concat(d.exchange).concat(d.shareholder);
+  var rec = null;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === id) { rec = all[i]; break; } }
+  if (!rec) return;
+  editingId = id;
+  var dict = loadMxDict();
+  var h = "";
+  if (rec.type === "income") {
+    h += "<div class=\"form-row\"><div><label>日期</label><input type=\"date\" id=\"edit-date\" value=\"" + rec.date + "\"></div><div><label>币种</label><select id=\"edit-currency\" onchange=\"updateEditAccount()\"><option value=\"KZT\"" + (rec.currency === "KZT" ? " selected" : "") + ">KZT</option><option value=\"CNY\"" + (rec.currency === "CNY" ? " selected" : "") + ">CNY</option><option value=\"USD\"" + (rec.currency === "USD" ? " selected" : "") + ">USD</option></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>账户</label><select id=\"edit-account\"></select></div><div><label>品类</label><select id=\"edit-cat\"></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>经办人</label><select id=\"edit-handler\"><option value=\"\">-- 选择经办人 --</option></select></div><div><label>成本</label><input type=\"number\" id=\"edit-cost\" value=\"" + (rec.cost || 0) + "\" step=\"0.01\"></div></div>";
+    h += "<div class=\"form-row\"><div><label>金额</label><input type=\"number\" id=\"edit-amount\" value=\"" + (rec.amount || 0) + "\" step=\"0.01\"></div><div><label>备注</label><input type=\"text\" id=\"edit-note\" value=\"" + esc(rec.note || "") + "\"></div></div>";
+  } else if (rec.type === "expense") {
+    h += "<div class=\"form-row\"><div><label>日期</label><input type=\"date\" id=\"edit-date\" value=\"" + rec.date + "\"></div><div><label>币种</label><select id=\"edit-currency\" onchange=\"updateEditAccount()\"><option value=\"KZT\"" + (rec.currency === "KZT" ? " selected" : "") + ">KZT</option><option value=\"CNY\"" + (rec.currency === "CNY" ? " selected" : "") + ">CNY</option><option value=\"USD\"" + (rec.currency === "USD" ? " selected" : "") + ">USD</option></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>账户</label><select id=\"edit-account\"></select></div><div><label>品类</label><select id=\"edit-cat\"></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>经办人</label><select id=\"edit-handler\"><option value=\"\">-- 选择经办人 --</option></select></div><div><label>金额</label><input type=\"number\" id=\"edit-amount\" value=\"" + (rec.amount || 0) + "\" step=\"0.01\"></div></div>";
+    h += "<div class=\"form-row\"><div><label>备注</label><input type=\"text\" id=\"edit-note\" value=\"" + esc(rec.note || "") + "\"></div></div>";
+  } else if (rec.type === "exchange") {
+    h += "<div class=\"form-row\"><div><label>日期</label><input type=\"date\" id=\"edit-date\" value=\"" + rec.date + "\"></div><div><label>类型</label><select id=\"edit-extype\"><option value=\"exchange\"" + (rec.exType === "exchange" ? " selected" : "") + ">换汇</option><option value=\"withdraw\"" + (rec.exType === "withdraw" ? " selected" : "") + ">取现</option><option value=\"deposit\"" + (rec.exType === "deposit" ? " selected" : "") + ">存钱</option></select></div></div>";
+    if (rec.exType !== "deposit") h += "<div class=\"form-row\"><div><label>换出账户</label><select id=\"edit-from-acct\"></select></div><div><label>换出金额</label><input type=\"number\" id=\"edit-from-amt\" value=\"" + (rec.fromAmt || rec.amount || 0) + "\" step=\"0.01\"></div></div>";
+    if (rec.exType !== "withdraw") h += "<div class=\"form-row\"><div><label>收到账户</label><select id=\"edit-to-acct\"></select></div><div><label>收到金额</label><input type=\"number\" id=\"edit-to-amt\" value=\"" + (rec.toAmt || rec.amount || 0) + "\" step=\"0.01\"></div></div>";
+    h += "<div class=\"form-row\"><div><label>备注</label><input type=\"text\" id=\"edit-note\" value=\"" + esc(rec.note || "") + "\"></div></div>";
+  } else if (rec.type === "shareholder") {
+    h += "<div class=\"form-row\"><div><label>日期</label><input type=\"date\" id=\"edit-date\" value=\"" + rec.date + "\"></div><div><label>币种</label><select id=\"edit-currency\"><option value=\"KZT\"" + (rec.currency === "KZT" ? " selected" : "") + ">KZT</option><option value=\"CNY\"" + (rec.currency === "CNY" ? " selected" : "") + ">CNY</option><option value=\"USD\"" + (rec.currency === "USD" ? " selected" : "") + ">USD</option></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>股东姓名</label><input type=\"text\" id=\"edit-name\" value=\"" + esc(rec.name || "") + "\"></div><div><label>账户</label><select id=\"edit-account\"></select></div></div>";
+    h += "<div class=\"form-row\"><div><label>出资金额</label><input type=\"number\" id=\"edit-amount\" value=\"" + (rec.amount || 0) + "\" step=\"0.01\"></div><div><label>备注</label><input type=\"text\" id=\"edit-note\" value=\"" + esc(rec.note || "") + "\"></div></div>";
+  }
+  document.getElementById("edit-form-content").innerHTML = h;
+  // Populate account selects
+  var accts = dict.accounts || [];
+  function fillAcct(selId, selected) {
+    var sel = document.getElementById(selId); if (!sel) return;
+    sel.innerHTML = ""; for (var i = 0; i < accts.length; i++) sel.innerHTML += "<option value=\"" + esc(accts[i].name) + "\"" + (accts[i].name === selected ? " selected" : "") + ">" + esc(accts[i].name) + (accts[i].cur ? " (" + accts[i].cur + ")" : "") + "</option>";
+  }
+  fillAcct("edit-account", rec.account || "");
+  fillAcct("edit-from-acct", rec.fromAccount || "");
+  fillAcct("edit-to-acct", rec.toAccount || "");
+  // Populate category selects
+  function fillCat(selId, cats, selected) {
+    var sel = document.getElementById(selId); if (!sel) return;
+    sel.innerHTML = ""; for (var i = 0; i < cats.length; i++) sel.innerHTML += "<option value=\"" + esc(cats[i]) + "\"" + (cats[i] === selected ? " selected" : "") + ">" + esc(cats[i]) + "</option>";
+  }
+  if (rec.type === "income") fillCat("edit-cat", dict.income_cats || [], rec.cat || "");
+  else if (rec.type === "expense") fillCat("edit-cat", dict.expense_cats || [], rec.cat || "");
+  // Populate handler select
+  var handlers = dict.handlers || []; var d2 = loadD();
+  for (var i = 0; i < d2.income.length; i++) { if (d2.income[i].handler && handlers.indexOf(d2.income[i].handler) < 0) handlers.push(d2.income[i].handler); }
+  for (var i = 0; i < d2.expense.length; i++) { if (d2.expense[i].handler && handlers.indexOf(d2.expense[i].handler) < 0) handlers.push(d2.expense[i].handler); }
+  var hs = document.getElementById("edit-handler"); if (hs) { for (var i = 0; i < handlers.length; i++) hs.innerHTML += "<option value=\"" + esc(handlers[i]) + "\"" + (handlers[i] === rec.handler ? " selected" : "") + ">" + esc(handlers[i]) + "</option>"; }
+  document.getElementById("modal-edit").classList.add("show");
+}
+
+function updateEditAccount() {
+  var cur = document.getElementById("edit-currency").value;
+  var map = {KZT: ["现金KZT","Kaspi店铺","银行KZT","Wolt/Glovo待结算"], CNY: ["现金CNY","微信/支付宝CNY"], USD: ["USD现金"]};
+  var accts = map[cur] || [];
+  var sel = document.getElementById("edit-account"); if (!sel) return;
+  sel.innerHTML = ""; for (var i = 0; i < accts.length; i++) sel.innerHTML += "<option value=\"" + esc(accts[i]) + "\">" + esc(accts[i]) + "</option>";
+}
+
+function saveEdit() {
+  if (!editingId) return;
+  var d = loadD();
+  var all = d.income.concat(d.expense).concat(d.exchange).concat(d.shareholder);
+  var rec = null;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === editingId) { rec = all[i]; break; } }
+  if (!rec) return;
+  
+  var date = document.getElementById("edit-date").value;
+  var note = document.getElementById("edit-note") ? document.getElementById("edit-note").value.trim() : "";
+  
+  if (rec.type === "income") {
+    rec.date = date;
+    rec.currency = document.getElementById("edit-currency") ? document.getElementById("edit-currency").value : rec.currency;
+    rec.account = document.getElementById("edit-account") ? document.getElementById("edit-account").value : rec.account;
+    rec.cat = document.getElementById("edit-cat") ? document.getElementById("edit-cat").value : rec.cat;
+    rec.handler = document.getElementById("edit-handler") ? document.getElementById("edit-handler").value : rec.handler;
+    rec.amount = parseFloat(document.getElementById("edit-amount").value) || 0;
+    rec.cost = parseFloat(document.getElementById("edit-cost").value) || 0;
+    rec.profit = Math.max(0, rec.amount - rec.cost);
+    rec.note = note;
+  } else if (rec.type === "expense") {
+    rec.date = date;
+    rec.currency = document.getElementById("edit-currency") ? document.getElementById("edit-currency").value : rec.currency;
+    rec.account = document.getElementById("edit-account") ? document.getElementById("edit-account").value : rec.account;
+    rec.cat = document.getElementById("edit-cat") ? document.getElementById("edit-cat").value : rec.cat;
+    rec.handler = document.getElementById("edit-handler") ? document.getElementById("edit-handler").value : rec.handler;
+    rec.amount = parseFloat(document.getElementById("edit-amount").value) || 0;
+    rec.note = note;
+  } else if (rec.type === "exchange") {
+    rec.date = date;
+    rec.exType = document.getElementById("edit-extype") ? document.getElementById("edit-extype").value : rec.exType;
+    rec.fromAccount = document.getElementById("edit-from-acct") ? document.getElementById("edit-from-acct").value : rec.fromAccount;
+    rec.toAccount = document.getElementById("edit-to-acct") ? document.getElementById("edit-to-acct").value : rec.toAccount;
+    rec.fromAmt = parseFloat(document.getElementById("edit-from-amt") ? document.getElementById("edit-from-amt").value : 0) || 0;
+    rec.toAmt = parseFloat(document.getElementById("edit-to-amt") ? document.getElementById("edit-to-amt").value : 0) || 0;
+    if (rec.exType === "withdraw") rec.amount = rec.fromAmt;
+    else if (rec.exType === "deposit") rec.amount = rec.toAmt;
+    rec.note = note;
+  } else if (rec.type === "shareholder") {
+    rec.date = date;
+    rec.name = document.getElementById("edit-name") ? document.getElementById("edit-name").value.trim() : rec.name;
+    rec.currency = document.getElementById("edit-currency") ? document.getElementById("edit-currency").value : rec.currency;
+    rec.account = document.getElementById("edit-account") ? document.getElementById("edit-account").value : rec.account;
+    rec.amount = parseFloat(document.getElementById("edit-amount").value) || 0;
+    rec.note = note;
+  }
+  
+  saveD(d);
+  document.getElementById("modal-edit").classList.remove("show");
+  editingId = null;
+  updateHandlerList();
+  refreshAll();
+  showToast("记录已更新 ✅");
+}
 function deleteRecord(id){if(!confirm('确定删除？此操作不可恢复。'))return;var d=loadD();for(var k in d){d[k]=d[k].filter(function(r){return r.id!==id})}saveD(d);document.getElementById('modal-detail').classList.remove('show');refreshAll();showToast('已删除')}
 
 // ====== SETTINGS ======

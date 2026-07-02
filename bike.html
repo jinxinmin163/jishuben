@@ -233,6 +233,17 @@ textarea{resize:vertical;min-height:50px}
   </div>
 </div>
 
+
+<div id="modal-edit" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal" style="max-height:90vh">
+    <h3>✏️ 编辑记录</h3>
+    <div id="edit-form-content"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('modal-edit').classList.remove('show')">取消</button>
+      <button class="btn btn-primary" onclick="saveEdit()">💾 保存修改</button>
+    </div>
+  </div>
+</div>
 <div id="modal-detail" class="modal-overlay">
   <div class="detail-modal" id="detail-content"></div>
 </div>
@@ -328,7 +339,96 @@ function updateBaseSalary(n,v){var sc=loadSalaryConfig();if(!sc[n])sc[n]={base:0
 function updateDeduction(n,v){var sc=loadSalaryConfig();if(!sc[n])sc[n]={base:0,deduction:0};sc[n].deduction=parseFloat(v)||0;saveSalaryConfig(sc);renderSalary()}
 
 // ====== DETAIL MODAL ======
-function showDetail(id){var data=loadData();var all=data.income.concat(data.expense).concat(data.exchange);var rec=null;for(var i=0;i<all.length;i++){if(all[i].id===id){rec=all[i];break}}if(!rec)return;var h='';if(rec.type==='income'){var profit=(rec.amount||0)-(rec.cost||0);var comm=userRole==='admin'?(Math.max(0,profit)*(rec.commRate||0)/100):null;h+='<h3>📥 收入详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--green)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';h+='<div class="line"><span>成本</span><span class="val">¥'+fmt(rec.cost||0)+'</span></div>';h+='<div class="line"><span>利润</span><span class="val" style="color:var(--green)">¥'+fmt(profit)+'</span></div>';if(comm!==null)h+='<div class="line"><span>提成 ('+(rec.commRate||0)+'%)</span><span class="val" style="color:var(--primary)">¥'+fmt(comm)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='expense'){h+='<h3>📤 支出详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--red)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='exchange'){h+='<h3>💱 换钱详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>现金变动</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';h+='<div class="line"><span>收款码变动</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}h+='<button class="btn btn-outline btn-block" style="margin-top:12px;color:var(--red)" onclick="deleteRecord('+id+')">🗑 删除记录</button>';document.getElementById('detail-content').innerHTML=h;document.getElementById('modal-detail').classList.add('show')}
+function showDetail(id){var data=loadData();var all=data.income.concat(data.expense).concat(data.exchange);var rec=null;for(var i=0;i<all.length;i++){if(all[i].id===id){rec=all[i];break}}if(!rec)return;var h='';if(rec.type==='income'){var profit=(rec.amount||0)-(rec.cost||0);var comm=userRole==='admin'?(Math.max(0,profit)*(rec.commRate||0)/100):null;h+='<h3>📥 收入详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--green)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';h+='<div class="line"><span>成本</span><span class="val">¥'+fmt(rec.cost||0)+'</span></div>';h+='<div class="line"><span>利润</span><span class="val" style="color:var(--green)">¥'+fmt(profit)+'</span></div>';if(comm!==null)h+='<div class="line"><span>提成 ('+(rec.commRate||0)+'%)</span><span class="val" style="color:var(--primary)">¥'+fmt(comm)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='expense'){h+='<h3>📤 支出详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>名称</span><span class="val">'+esc(rec.name||'-')+'</span></div>';h+='<div class="line"><span>品类</span><span class="val">'+esc(rec.cat)+'</span></div>';h+='<div class="line"><span>经办人</span><span class="val">'+esc(rec.handler||'-')+'</span></div>';h+='<div class="line"><span>总金额</span><span class="val" style="color:var(--red)">¥'+fmt(rec.amount)+'</span></div>';if(rec.cash)h+='<div class="line"><span>现金</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';if(rec.qr)h+='<div class="line"><span>收款码</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.wx)h+='<div class="line"><span>微信</span><span class="val">¥'+fmt(rec.wx)+'</span></div>';if(rec.zfb)h+='<div class="line"><span>支付宝</span><span class="val">¥'+fmt(rec.zfb)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}else if(rec.type==='exchange'){h+='<h3>💱 换钱详情</h3>';h+='<div class="line"><span>日期</span><span class="val">'+rec.date+'</span></div>';h+='<div class="line"><span>店铺</span><span class="val">'+esc(rec.store)+'</span></div>';h+='<div class="line"><span>现金变动</span><span class="val">¥'+fmt(rec.cash)+'</span></div>';h+='<div class="line"><span>收款码变动</span><span class="val">¥'+fmt(rec.qr)+'</span></div>';if(rec.note)h+='<div class="line"><span>备注</span><span class="val">'+esc(rec.note)+'</span></div>'}h+='<button class="btn btn-outline btn-block" style="margin-top:12px;color:var(--red)" onclick="deleteRecord('+id+')">🗑 删除记录</button>';if(userRole==='admin')h+='<button class="btn btn-primary btn-block" style="margin-top:6px" onclick="document.getElementById(\'modal-detail\').classList.remove(\'show\');openEdit('+id+')">✏️ 编辑记录</button>';document.getElementById('detail-content').innerHTML=h;document.getElementById('modal-detail').classList.add('show')}
+
+// ====== EDIT RECORD ======
+var editingId = null;
+function openEdit(id) {
+  var data = loadData();
+  var all = data.income.concat(data.expense).concat(data.exchange);
+  var rec = null;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === id) { rec = all[i]; break; } }
+  if (!rec) return;
+  editingId = id;
+  var h = '';
+  if (rec.type === "income") {
+    h += '<div class="form-row"><div><label>日期</label><input type="date" id="edit-date" value="' + rec.date + '"></div><div><label>店铺</label><select id="edit-store"></select></div></div>';
+    h += '<div class="form-row"><div><label>名称</label><input type="text" id="edit-name" value="' + esc(rec.name || "") + '"></div><div><label>品类</label><select id="edit-cat"></select></div></div>';
+    h += '<div class="form-row"><div><label>经办人</label><select id="edit-handler"><option value="">-- 选择经办人 --</option></select></div><div><label>成本</label><input type="number" id="edit-cost" value="' + (rec.cost || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>现金</label><input type="number" id="edit-cash" value="' + (rec.cash || 0) + '" step="0.01"></div><div><label>收款码</label><input type="number" id="edit-qr" value="' + (rec.qr || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>微信</label><input type="number" id="edit-wx" value="' + (rec.wx || 0) + '" step="0.01"></div><div><label>支付宝</label><input type="number" id="edit-zfb" value="' + (rec.zfb || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>备注</label><input type="text" id="edit-note" value="' + esc(rec.note || "") + '"></div></div>';
+  } else if (rec.type === "expense") {
+    h += '<div class="form-row"><div><label>日期</label><input type="date" id="edit-date" value="' + rec.date + '"></div><div><label>店铺</label><select id="edit-store"></select></div></div>';
+    h += '<div class="form-row"><div><label>名称</label><input type="text" id="edit-name" value="' + esc(rec.name || "") + '"></div><div><label>品类</label><select id="edit-cat"></select></div></div>';
+    h += '<div class="form-row"><div><label>经办人</label><select id="edit-handler"><option value="">-- 选择经办人 --</option></select></div></div>';
+    h += '<div class="form-row"><div><label>现金</label><input type="number" id="edit-cash" value="' + (rec.cash || 0) + '" step="0.01"></div><div><label>收款码</label><input type="number" id="edit-qr" value="' + (rec.qr || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>微信</label><input type="number" id="edit-wx" value="' + (rec.wx || 0) + '" step="0.01"></div><div><label>支付宝</label><input type="number" id="edit-zfb" value="' + (rec.zfb || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>备注</label><input type="text" id="edit-note" value="' + esc(rec.note || "") + '"></div></div>';
+  } else if (rec.type === "exchange") {
+    h += '<div class="form-row"><div><label>日期</label><input type="date" id="edit-date" value="' + rec.date + '"></div><div><label>店铺</label><select id="edit-store"></select></div></div>';
+    h += '<div class="form-row"><div><label>现金变动</label><input type="number" id="edit-cash" value="' + (rec.cash || 0) + '" step="0.01"></div><div><label>收款码变动</label><input type="number" id="edit-qr" value="' + (rec.qr || 0) + '" step="0.01"></div></div>';
+    h += '<div class="form-row"><div><label>备注</label><input type="text" id="edit-note" value="' + esc(rec.note || "") + '"></div></div>';
+  }
+  document.getElementById("edit-form-content").innerHTML = h;
+  // Populate dropdowns
+  var stores = STORES(); var ss = document.getElementById("edit-store"); if (ss) { ss.innerHTML = ""; for (var i = 0; i < stores.length; i++) ss.innerHTML += "<option value=\"" + esc(stores[i]) + "\"" + (stores[i] === rec.store ? " selected" : "") + ">" + esc(stores[i]) + "</option>"; }
+  if (rec.type === "income") { var cats = INCOME_CATS(); } else { var cats = EXPENSE_CATS(); }
+  var cs = document.getElementById("edit-cat"); if (cs) { cs.innerHTML = ""; for (var i = 0; i < cats.length; i++) cs.innerHTML += "<option value=\"" + esc(cats[i]) + "\"" + (cats[i] === rec.cat ? " selected" : "") + ">" + esc(cats[i]) + "</option>"; }
+  var hs = document.getElementById("edit-handler"); if (hs) { var dict = loadDict(); var handlers = dict.handlers || []; var data2 = loadData(); for (var i = 0; i < data2.income.length; i++) { if (data2.income[i].handler && handlers.indexOf(data2.income[i].handler) < 0) handlers.push(data2.income[i].handler); } for (var i = 0; i < data2.expense.length; i++) { if (data2.expense[i].handler && handlers.indexOf(data2.expense[i].handler) < 0) handlers.push(data2.expense[i].handler); } for (var i = 0; i < handlers.length; i++) hs.innerHTML += "<option value=\"" + esc(handlers[i]) + "\"" + (handlers[i] === rec.handler ? " selected" : "") + ">" + esc(handlers[i]) + "</option>"; }
+  document.getElementById("modal-edit").classList.add("show");
+}
+
+function saveEdit() {
+  if (!editingId) return;
+  var data = loadData();
+  var all = data.income.concat(data.expense).concat(data.exchange);
+  var rec = null;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === editingId) { rec = all[i]; break; } }
+  if (!rec) return;
+  
+  var date = document.getElementById("edit-date").value;
+  var store = document.getElementById("edit-store") ? document.getElementById("edit-store").value : rec.store;
+  var note = document.getElementById("edit-note") ? document.getElementById("edit-note").value.trim() : "";
+  
+  if (rec.type === "income") {
+    var cash = parseFloat(document.getElementById("edit-cash").value) || 0;
+    var qr = parseFloat(document.getElementById("edit-qr").value) || 0;
+    var wx = parseFloat(document.getElementById("edit-wx").value) || 0;
+    var zfb = parseFloat(document.getElementById("edit-zfb").value) || 0;
+    var cost = parseFloat(document.getElementById("edit-cost").value) || 0;
+    var amount = cash + qr + wx + zfb;
+    var cat = document.getElementById("edit-cat") ? document.getElementById("edit-cat").value : rec.cat;
+    rec.date = date; rec.store = store; rec.name = document.getElementById("edit-name").value.trim() || "未命名";
+    rec.cat = cat; rec.handler = document.getElementById("edit-handler") ? document.getElementById("edit-handler").value : rec.handler;
+    rec.cash = cash; rec.qr = qr; rec.wx = wx; rec.zfb = zfb;
+    rec.amount = amount; rec.cost = cost; rec.profit = Math.max(0, amount - cost);
+    rec.commRate = getRate(cat); rec.note = note;
+  } else if (rec.type === "expense") {
+    var cash = parseFloat(document.getElementById("edit-cash").value) || 0;
+    var qr = parseFloat(document.getElementById("edit-qr").value) || 0;
+    var wx = parseFloat(document.getElementById("edit-wx").value) || 0;
+    var zfb = parseFloat(document.getElementById("edit-zfb").value) || 0;
+    var amount = cash + qr + wx + zfb;
+    rec.date = date; rec.store = store; rec.name = document.getElementById("edit-name").value.trim() || "未命名";
+    rec.cat = document.getElementById("edit-cat") ? document.getElementById("edit-cat").value : rec.cat;
+    rec.handler = document.getElementById("edit-handler") ? document.getElementById("edit-handler").value : rec.handler;
+    rec.cash = cash; rec.qr = qr; rec.wx = wx; rec.zfb = zfb;
+    rec.amount = amount; rec.note = note;
+  } else if (rec.type === "exchange") {
+    rec.date = date; rec.store = store;
+    rec.cash = parseFloat(document.getElementById("edit-cash").value) || 0;
+    rec.qr = parseFloat(document.getElementById("edit-qr").value) || 0;
+    rec.note = note;
+  }
+  
+  saveData(data);
+  document.getElementById("modal-edit").classList.remove("show");
+  editingId = null;
+  updateHandlerList();
+  refreshAll();
+  showToast("记录已更新 ✅");
+}
 function deleteRecord(id){if(!confirm('确定要删除这条记录吗？此操作不可恢复。'))return;var data=loadData();for(var k in data){data[k]=data[k].filter(function(r){return r.id!==id})}saveData(data);document.getElementById('modal-detail').classList.remove('show');refreshAll();showToast('已删除')}
 
 // ====== SETTINGS ======
